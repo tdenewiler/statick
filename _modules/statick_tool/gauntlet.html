@@ -1,0 +1,272 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>statick_tool.gauntlet &#8212; Statick  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for statick_tool.gauntlet</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Main file for statick gauntlet tool.</span>
+
+<span class="sd">This is used to find dependency issues in catkin_workspaces.</span>
+<span class="sd">This file is a huge mess right now since it&#39;s ported pretty directly</span>
+<span class="sd">from the old version of the tool.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">fnmatch</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+
+<span class="kn">from</span> <span class="nn">statick_tool.args</span> <span class="k">import</span> <span class="n">Args</span>
+<span class="kn">from</span> <span class="nn">statick_tool.resources</span> <span class="k">import</span> <span class="n">Resources</span>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../statick_tool.html#statick_tool.gauntlet.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>  <span class="c1"># pylint: disable=too-many-locals, too-many-branches, too-many-statements</span>
+    <span class="sd">&quot;&quot;&quot;Run gauntlet tool.&quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="s2">&quot;Statick gauntlet tool&quot;</span><span class="p">)</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;src_path&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path of catkin src directory&quot;</span><span class="p">)</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;out_path&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Output path&quot;</span><span class="p">)</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--force-cmake&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;force_cmake&quot;</span><span class="p">,</span>
+                             <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Force CMake&quot;</span><span class="p">)</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--failed-only&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;failed_only&quot;</span><span class="p">,</span>
+                             <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+                             <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only build targets from last failed run&quot;</span><span class="p">)</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--targets-file&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;targets_file&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                             <span class="n">help</span><span class="o">=</span><span class="s2">&quot;File listing targets to run&quot;</span><span class="p">)</span>
+
+    <span class="n">resources</span> <span class="o">=</span> <span class="n">Resources</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">get_user_paths</span><span class="p">())</span>
+    <span class="n">parsed_args</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">get_args</span><span class="p">()</span>
+
+    <span class="n">src_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">src_path</span><span class="p">)</span>
+    <span class="n">out_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">out_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">src_path</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">src_path</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Source path &quot;</span> <span class="o">+</span> <span class="n">src_path</span> <span class="o">+</span> <span class="s2">&quot; not found!&quot;</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">out_path</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">out_path</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Output path &quot;</span> <span class="o">+</span> <span class="n">out_path</span> <span class="o">+</span> <span class="s2">&quot; not found!&quot;</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">src_files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">src_path</span><span class="p">)</span>
+    <span class="n">out_files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">out_path</span><span class="p">)</span>
+    <span class="n">fail_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="s2">&quot;failed.txt&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;CMakeLists.txt&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">src_files</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;No CMakeLists.txt found in src directory. Is your catkin workspace initialized?&quot;</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;CMakeCache.txt&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">out_files</span> <span class="ow">or</span> <span class="n">parsed_args</span><span class="o">.</span><span class="n">force_cmake</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Running CMake...&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">([</span><span class="s2">&quot;cmake&quot;</span><span class="p">,</span> <span class="n">src_path</span><span class="p">,</span> <span class="s2">&quot;-B&quot;</span> <span class="o">+</span> <span class="n">out_path</span><span class="p">])</span>
+        <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;CMake FAILED!&quot;</span>
+            <span class="nb">print</span> <span class="n">exc</span><span class="o">.</span><span class="n">output</span>
+            <span class="nb">print</span> <span class="s2">&quot;CMake FAILED!&quot;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;CMake complete&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;CMake cache found. Skipping CMake step.&quot;</span>
+
+    <span class="n">raw_targets</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="nb">print</span> <span class="s2">&quot;Gathering make targets...&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">parsed_args</span><span class="o">.</span><span class="n">failed_only</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">parsed_args</span><span class="o">.</span><span class="n">targets_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">target_re</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;^([a-zA-Z0-9][^$#\/\t=]*):([^=]|$)&quot;</span>
+            <span class="n">target_rec</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">target_re</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">_</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">([</span><span class="s2">&quot;make&quot;</span><span class="p">,</span> <span class="s2">&quot;-qp&quot;</span><span class="p">],</span> <span class="n">cwd</span><span class="o">=</span><span class="n">out_path</span><span class="p">)</span>  <span class="c1"># NOLINT</span>
+            <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">exc</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
+                    <span class="n">match</span> <span class="o">=</span> <span class="n">target_rec</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                        <span class="n">target</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">raw_targets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">targets_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">targets_file</span><span class="p">)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">targets_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fname</span><span class="p">:</span>
+                    <span class="n">raw_targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">target</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">fname</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+                                   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;#&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Targets file not found&quot;</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fail_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fname</span><span class="p">:</span>
+                <span class="n">raw_targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">target</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">fname</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+                               <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;#&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Failed file from previous run not found. &quot;</span> \
+                  <span class="s2">&quot;Did you actually run the gauntlet once before?&quot;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s2">&quot;Gathering make targets complete.&quot;</span>
+
+    <span class="n">ignore_targets</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">resources</span><span class="o">.</span><span class="n">get_file</span><span class="p">(</span><span class="s2">&quot;gauntlet_ignore.yaml&quot;</span><span class="p">))</span> <span class="k">as</span> <span class="n">fname</span><span class="p">:</span>
+            <span class="n">ignore_targets</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Gauntlet ignore yaml file not found.&quot;</span>
+
+    <span class="n">targets</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">raw_target</span> <span class="ow">in</span> <span class="n">raw_targets</span><span class="p">:</span>
+        <span class="n">add</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">ignore_target</span> <span class="ow">in</span> <span class="n">ignore_targets</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">raw_target</span><span class="p">,</span> <span class="n">ignore_target</span><span class="p">):</span>
+                <span class="n">add</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">add</span><span class="p">:</span>
+            <span class="n">targets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">raw_target</span><span class="p">)</span>
+
+    <span class="n">targets_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="s2">&quot;targets.txt&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">targets_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fname</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+            <span class="n">fname</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">target</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">failed</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fail_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fname</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="nb">print</span> <span class="s2">&quot;BEGIN GAUNTLET&quot;</span>
+        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nb">print</span> <span class="s2">&quot;------------&quot;</span>
+            <span class="nb">print</span> <span class="s2">&quot; start &quot;</span> <span class="o">+</span> <span class="n">target</span>
+            <span class="nb">print</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s2">&quot;of&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="s2">&quot;------------&quot;</span>
+
+            <span class="nb">print</span> <span class="s2">&quot;@@clean@@&quot;</span>
+            <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s2">&quot;make&quot;</span><span class="p">,</span> <span class="s2">&quot;clean&quot;</span><span class="p">],</span> <span class="n">cwd</span><span class="o">=</span><span class="n">out_path</span><span class="p">)</span>
+            <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="nb">print</span> <span class="s2">&quot;@@get rid of headers@@&quot;</span>
+            <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s2">&quot;find&quot;</span><span class="p">,</span> <span class="s2">&quot;devel&quot;</span><span class="p">,</span> <span class="s2">&quot;-name&quot;</span><span class="p">,</span> <span class="s2">&quot;*.h&quot;</span><span class="p">,</span> <span class="s2">&quot;-type&quot;</span><span class="p">,</span> <span class="s2">&quot;f&quot;</span><span class="p">,</span> <span class="s2">&quot;-delete&quot;</span><span class="p">],</span>
+                                    <span class="n">cwd</span><span class="o">=</span><span class="n">out_path</span><span class="p">)</span>
+            <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="nb">print</span> <span class="s2">&quot;@@make@@&quot;</span>
+            <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s2">&quot;make&quot;</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="s2">&quot;-j8&quot;</span><span class="p">],</span> <span class="n">cwd</span><span class="o">=</span><span class="n">out_path</span><span class="p">)</span>
+            <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;*** FAILURE ***&quot;</span>
+                <span class="nb">print</span> <span class="s2">&quot;  target&quot;</span><span class="p">,</span> <span class="n">target</span>
+                <span class="nb">print</span> <span class="s2">&quot;*** FAILURE ***&quot;</span>
+                <span class="n">failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+                <span class="n">fname</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">target</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">fname</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="nb">print</span> <span class="s2">&quot;@@done@@&quot;</span>
+
+            <span class="nb">print</span> <span class="s2">&quot;------------&quot;</span>
+            <span class="nb">print</span> <span class="s2">&quot; end &quot;</span> <span class="o">+</span> <span class="n">target</span>
+            <span class="nb">print</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s2">&quot;of&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="s2">&quot;------------&quot;</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">failed</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;*** FAILED *** &quot;</span>
+                <span class="k">for</span> <span class="n">fail</span> <span class="ow">in</span> <span class="n">failed</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="s2">&quot;  &quot;</span> <span class="o">+</span> <span class="n">fail</span>
+                <span class="nb">print</span> <span class="s2">&quot;*** FAILED *** &quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;END GAUNTLET&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">failed</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Build failures found&quot;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;No errors&quot;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Statick</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../statick_tool.html">statick_tool package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, SSC Pacific.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

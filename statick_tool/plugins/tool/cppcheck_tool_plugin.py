@@ -1,13 +1,13 @@
 """Apply cppcheck tool and gather results."""
 
 from __future__ import print_function
-import subprocess
-import shlex
-import re
-import os
 
-from statick_tool.tool_plugin import ToolPlugin
+import os
+import re
+import subprocess
+
 from statick_tool.issue import Issue
+from statick_tool.tool_plugin import ToolPlugin
 
 
 class CppcheckToolPlugin(ToolPlugin):
@@ -39,13 +39,10 @@ class CppcheckToolPlugin(ToolPlugin):
             return []
 
         flags = ["--report-progress", "--verbose", "--inline-suppr", "--language=c++"]
-        user_flags = self.plugin_context.config.get_tool_config(self.get_name(), level, "flags")
+        flags += self.get_user_flags(level)
         user_version = self.plugin_context.config.get_tool_config(self.get_name(),
                                                                   level,
                                                                   "version")
-        lex = shlex.shlex(user_flags, posix=True)
-        lex.whitespace_split = True
-        flags = flags + list(lex)
 
         cppcheck_bin = "cppcheck"
         if self.plugin_context.args.cppcheck_bin is not None:
@@ -53,7 +50,8 @@ class CppcheckToolPlugin(ToolPlugin):
 
         try:
             output = subprocess.check_output([cppcheck_bin, "--version"],
-                                             stderr=subprocess.STDOUT)
+                                             stderr=subprocess.STDOUT,
+                                             universal_newlines=True)
             ver_re = r"(.+) ([0-9]*\.?[0-9]+)"
             parse = re.compile(ver_re)
             match = parse.match(output)
@@ -92,7 +90,8 @@ class CppcheckToolPlugin(ToolPlugin):
         try:
             output = subprocess.check_output([cppcheck_bin] + flags +
                                              include_args + files,
-                                             stderr=subprocess.STDOUT)
+                                             stderr=subprocess.STDOUT,
+                                             universal_newlines=True)
         except subprocess.CalledProcessError as ex:
             output = ex.output
             if ex.returncode != 2:
@@ -131,7 +130,7 @@ class CppcheckToolPlugin(ToolPlugin):
                 dummy, extension = os.path.splitext(match.group(1))
                 if extension in self.valid_extensions:
                     cert_reference = None
-                    if match.group(4) in warnings_mapping.keys():
+                    if match.group(4) in warnings_mapping:
                         cert_reference = warnings_mapping[match.group(4)]
                     issues.append(Issue(match.group(1), match.group(2),
                                         self.get_name(), match.group(3) +

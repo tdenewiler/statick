@@ -1,11 +1,12 @@
 """Apply lizard tool and gather results."""
 
 from __future__ import print_function
-import subprocess
-import re
 
-from statick_tool.tool_plugin import ToolPlugin
+import re
+import subprocess
+
 from statick_tool.issue import Issue
+from statick_tool.tool_plugin import ToolPlugin
 
 
 class LizardToolPlugin(ToolPlugin):
@@ -24,7 +25,8 @@ class LizardToolPlugin(ToolPlugin):
             src_dir = package["src_dir"]
 
         try:
-            output = subprocess.check_output(["lizard", "-w", src_dir])
+            output = subprocess.check_output(["lizard", "-w", src_dir],
+                                             universal_newlines=True)
         except subprocess.CalledProcessError as ex:
             if ex.returncode == 1:
                 output = ex.output

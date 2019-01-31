@@ -1,13 +1,14 @@
 """Write issue reports to screen and file."""
 
 from __future__ import print_function
+
 from collections import OrderedDict
 
 
 def write_report_file(issues, filename):
     """Format issues into a new file format."""
     with open(filename, "w") as out:
-        for dummy, value in issues.iteritems():
+        for dummy, value in list(issues.items()):
             for issue in value:
                 if issue.cert_reference:
                     line = "[%s][%s][%s:%s][%s (%s)][%s]\n" % (issue.filename,
@@ -31,7 +32,7 @@ def generate_report(issues, output_filename):
     """Print report to screen."""
     total = 0
     print("---Report---")
-    for key, value in issues.iteritems():
+    for key, value in list(issues.items()):
         unique_issues = list(OrderedDict.fromkeys(value))
         print("Tool {}: {} unique issues".format(key, len(unique_issues)))
         for issue in unique_issues:

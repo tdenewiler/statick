@@ -1,12 +1,12 @@
 """Apply findbugs tool and gather results."""
 
 from __future__ import print_function
-import subprocess
-import shlex
-import re
 
-from statick_tool.tool_plugin import ToolPlugin
+import re
+import subprocess
+
 from statick_tool.issue import Issue
+from statick_tool.tool_plugin import ToolPlugin
 
 
 class FindbugsToolPlugin(ToolPlugin):
@@ -27,31 +27,26 @@ class FindbugsToolPlugin(ToolPlugin):
 
     def scan(self, package, level):
         """Run tool and gather output."""
-        if "java_bin" not in package:
+        if "java_bin" not in package or not package["java_bin"]:
             return []
 
         findbugs_bin = "findbugs"
         if self.plugin_context.args.findbugs_bin is not None:
             findbugs_bin = self.plugin_context.args.findbugs_bin
 
-        flags = ["-effort:max", "-dontCombineWarnings", "longBugCodes"]
-        user_flags = self.plugin_context.config.get_tool_config(self.get_name(),
-                                                                level, "flags")
-        lex = shlex.shlex(user_flags, posix=True)
-        lex.whitespace_split = True
-        flags = flags + list(lex)
+        flags = ["-textui", "-effort:max", "-dontCombineWarnings",
+                 "-longBugCodes", "-low"]
+        flags += self.get_user_flags(level)
 
         include_file = self.plugin_context.config.get_tool_config(self.get_name(),
                                                                   level, "include")
         exclude_file = self.plugin_context.config.get_tool_config(self.get_name(),
                                                                   level, "exclude")
         if include_file is not None:
-            flags += ["-include %s" %
-                      (self.plugin_context.resources.get_file(include_file))]
+            flags += ["-include", self.plugin_context.resources.get_file(include_file)]
 
         if exclude_file is not None:
-            flags += ["-exclude %s" %
-                      (self.plugin_context.resources.get_file(exclude_file))]
+            flags += ["-exclude", self.plugin_context.resources.get_file(exclude_file)]
 
         files = []
         if "java_bin" in package:
@@ -59,7 +54,8 @@ class FindbugsToolPlugin(ToolPlugin):
 
         try:
             output = subprocess.check_output([findbugs_bin] + flags + files,
-                                             stderr=subprocess.STDOUT)
+                                             stderr=subprocess.STDOUT,
+                                             universal_newlines=True)
         except subprocess.CalledProcessError as ex:
             output = ex.output
             if ex.returncode != 1:
@@ -92,7 +88,7 @@ class FindbugsToolPlugin(ToolPlugin):
             match = parse.match(line)
             if match:
                 cert_reference = None
-                if match.group(1) in warnings_mapping.keys():
+                if match.group(1) in warnings_mapping:
                     cert_reference = warnings_mapping[match.group(1)]
                 issues.append(Issue(match.group(3), match.group(4),
                                     self.get_name(), match.group(1),

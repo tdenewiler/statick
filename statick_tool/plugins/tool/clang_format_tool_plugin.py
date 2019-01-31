@@ -1,13 +1,13 @@
 """Apply clang-format tool and gather results."""
 
 from __future__ import print_function
-import subprocess
-import shlex
-import re
-import difflib
 
-from statick_tool.tool_plugin import ToolPlugin
+import difflib
+import re
+import subprocess
+
 from statick_tool.issue import Issue
+from statick_tool.tool_plugin import ToolPlugin
 
 
 class ClangFormatToolPlugin(ToolPlugin):
@@ -42,13 +42,8 @@ class ClangFormatToolPlugin(ToolPlugin):
         if self.plugin_context.args.clang_format_bin is not None:
             clang_format_bin = self.plugin_context.args.clang_format_bin
 
-        flags = ["-header-filter="+package["src_dir"]+"/.*", "-p",
-                 package["bin_dir"]+"/compile_commands.json"]
-        user_flags = self.plugin_context.config.get_tool_config(self.get_name(),
-                                                                level, "flags")
-        lex = shlex.shlex(user_flags, posix=True)
-        lex.whitespace_split = True
-        flags = flags + list(lex)
+        flags = []
+        flags += self.get_user_flags(level)
 
         files = []
         if "make_targets" in package:
@@ -62,7 +57,8 @@ class ClangFormatToolPlugin(ToolPlugin):
         try:
             output = subprocess.check_output([clang_format_bin,
                                               "--dump-config"],
-                                             stderr=subprocess.STDOUT)
+                                             stderr=subprocess.STDOUT,
+                                             universal_newlines=True)
             format_file_name = self.plugin_context.resources.get_file("_clang-format")
             with open(format_file_name, "r") as format_file:
                 target_format = format_file.read()
@@ -72,7 +68,7 @@ class ClangFormatToolPlugin(ToolPlugin):
                 if line.startswith("+ ") or line.startswith("- ") or \
                    line.startswith("! "):
                     if line[2:].strip()[0] != "#":
-# pylint: disable=line-too-long
+                        # pylint: disable=line-too-long
                         exc = subprocess.CalledProcessError(-1,
                                                             clang_format_bin,
                                                             ".clang-format style is not correct. There is one located in {}. Put this file in your home directory.".
@@ -84,7 +80,8 @@ class ClangFormatToolPlugin(ToolPlugin):
             for src in files:
                 output = subprocess.check_output([clang_format_bin, src,
                                                   "-output-replacements-xml"],
-                                                 stderr=subprocess.STDOUT)
+                                                 stderr=subprocess.STDOUT,
+                                                 universal_newlines=True)
                 output = src + "\n" + output
                 if self.plugin_context.args.clang_format_raise_exception:
                     total_output.append(output)

@@ -1,11 +1,12 @@
 """Apply make tool and gather results."""
 
 from __future__ import print_function
-import subprocess
-import re
 
-from statick_tool.tool_plugin import ToolPlugin
+import re
+import subprocess
+
 from statick_tool.issue import Issue
+from statick_tool.tool_plugin import ToolPlugin
 
 
 class MakeToolPlugin(ToolPlugin):
@@ -25,9 +26,11 @@ class MakeToolPlugin(ToolPlugin):
         make_args = ["make", "statick_cmake_target"] + extra_args
 
         try:
-            output = subprocess.check_output(["make", "clean"])
+            output = subprocess.check_output(["make", "clean"],
+                                             universal_newlines=True)
             output = subprocess.check_output(make_args,
-                                             stderr=subprocess.STDOUT)
+                                             stderr=subprocess.STDOUT,
+                                             universal_newlines=True)
             if self.plugin_context.args.show_tool_output:
                 print("{}".format(output))
         except subprocess.CalledProcessError as ex:
@@ -58,7 +61,7 @@ class MakeToolPlugin(ToolPlugin):
         while i < len(matches):
             cur_match = matches[i]
             if "overloaded-virtual" in cur_match[4] and i + 1 < len(matches):
-                next_match = matches[i+1]
+                next_match = matches[i + 1]
                 if next_match[0].startswith(package.path):
                     result.append((next_match[0], next_match[1], next_match[2],
                                    cur_match[3], cur_match[4] + next_match[4]))
@@ -87,7 +90,7 @@ class MakeToolPlugin(ToolPlugin):
         for match in matches:
             cert_reference = None
             warning_list = warning_parse.match(match[4])
-            if warning_list is not None and warning_list.groups(1)[0] in warnings_mapping.keys():
+            if warning_list is not None and warning_list.groups(1)[0] in warnings_mapping:
                 cert_reference = warnings_mapping[warning_list.groups(1)[0]]
 
             if warning_list is None:

@@ -4,6 +4,7 @@ Manages which plugins are run for each statick scan level.
 Sets what flags are used for each plugin at those levels.
 """
 from collections import OrderedDict
+
 import yaml
 
 
@@ -28,7 +29,7 @@ class Config(object):
         level_config = self.config["levels"][level]
         plugins = []
         if plugin_type in level_config:
-            plugins += level_config[plugin_type].keys()
+            plugins += list(level_config[plugin_type])
         if "inherits_from" in level_config:
             inherited_level = level_config["inherits_from"]
             plugins += self.get_enabled_plugins(inherited_level, plugin_type)
@@ -43,8 +44,10 @@ class Config(object):
         """Get what discovery plugins are enabled for a certain level."""
         return self.get_enabled_plugins(level, "discovery")
 
-    def get_plugin_config(self, plugin_type, plugin, level, key, default=None):  #pylint: disable=too-many-arguments
+    def get_plugin_config(self, plugin_type, plugin, level, key, default=None):  # pylint: disable=too-many-arguments
         """Get flags to use for a plugin at a certain level."""
+        if level not in self.config["levels"].keys():
+            return default
         level_config = self.config["levels"][level]
         if plugin_type in level_config:
             type_config = level_config[plugin_type]

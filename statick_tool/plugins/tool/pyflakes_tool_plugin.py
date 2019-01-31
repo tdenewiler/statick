@@ -1,12 +1,12 @@
 """Apply pyflakes tool and gather results."""
 
 from __future__ import print_function
-import subprocess
-import shlex
-import re
 
-from statick_tool.tool_plugin import ToolPlugin
+import re
+import subprocess
+
 from statick_tool.issue import Issue
+from statick_tool.tool_plugin import ToolPlugin
 
 
 class PyflakesToolPlugin(ToolPlugin):
@@ -19,11 +19,7 @@ class PyflakesToolPlugin(ToolPlugin):
     def scan(self, package, level):
         """Run tool and gather output."""
         flags = []
-        user_flags = self.plugin_context.config.get_tool_config(self.get_name(),
-                                                                level, "flags")
-        lex = shlex.shlex(user_flags, posix=True)
-        lex.whitespace_split = True
-        flags = flags + list(lex)
+        flags += self.get_user_flags(level)
 
         total_output = []
 
@@ -31,7 +27,8 @@ class PyflakesToolPlugin(ToolPlugin):
             try:
                 subproc_args = ["pyflakes", src] + flags
                 output = subprocess.check_output(subproc_args,
-                                                 stderr=subprocess.STDOUT)
+                                                 stderr=subprocess.STDOUT,
+                                                 universal_newlines=True)
 
             except subprocess.CalledProcessError as ex:
                 if ex.returncode != 32:

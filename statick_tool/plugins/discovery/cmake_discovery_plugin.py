@@ -1,10 +1,11 @@
 """Discovery plugin to find CMake-based projects."""
 
 from __future__ import print_function
+
 import os
+import re
 import shutil
 import subprocess
-import re
 
 from statick_tool.discovery_plugin import DiscoveryPlugin
 
@@ -20,13 +21,14 @@ class CMakeDiscoveryPlugin(DiscoveryPlugin):
         """Scan package looking for CMake files."""
         cmake_file = os.path.join(package.path, "CMakeLists.txt")
 
-        if not os.path.isfile(cmake_file):
-            print("  Package is not cmake.")
-            return
-
         package["cmake"] = True
         package["make_targets"] = []
         package["headers"] = []
+
+        if not os.path.isfile(cmake_file):
+            print("  Package is not cmake.")
+            package["cmake"] = False
+            return
 
         print("  Found cmake package {}".format(cmake_file))
 
@@ -42,7 +44,8 @@ class CMakeDiscoveryPlugin(DiscoveryPlugin):
 
         try:
             output = subprocess.check_output(subproc_args,
-                                             stderr=subprocess.STDOUT)
+                                             stderr=subprocess.STDOUT,
+                                             universal_newlines=True)
             if self.plugin_context.args.show_tool_output:
                 print("{}".format(output))
         except subprocess.CalledProcessError as ex:
@@ -51,7 +54,7 @@ class CMakeDiscoveryPlugin(DiscoveryPlugin):
                   format(str(ex.returncode)))
             print("{}".format(ex.output))
 
-        except OSError as ex:
+        except OSError:
             print("Couldn't find cmake executable!")
             return None
 
@@ -67,15 +70,13 @@ class CMakeDiscoveryPlugin(DiscoveryPlugin):
     def process_output(cls, output, package):
         """Parse the tool output."""
 # pylint: disable=anomalous-backslash-in-string
-        cmake_target_re = r"-- TARGET: \[NAME:(.+)\]" \
-                          "\[SRC_DIR:(.+)\]\[INCLUDE_DIRS:(.+)\]\[SRC:(.+)\]"
+        cmake_target_re = r"-- TARGET: \[NAME:(.+)\]\[SRC_DIR:(.+)\]\[INCLUDE_DIRS:(.+)\]\[SRC:(.+)\]"  # NOQA: W605 # NOLINT
         target_p = re.compile(cmake_target_re)
         cmake_headers_re = r"-- HEADERS: (.+)"
         headers_p = re.compile(cmake_headers_re)
         cmake_roslint_re = r"-- ROSLINT: (.+)"
         roslint_p = re.compile(cmake_roslint_re)
-        cmake_project_re = r"-- PROJECT: \[NAME:(.+)\]" \
-                           "\[SRC_DIR:(.+)\]\[BIN_DIR:(.+)\]"
+        cmake_project_re = r"-- PROJECT: \[NAME:(.+)\]\[SRC_DIR:(.+)\]\[BIN_DIR:(.+)\]"  # NOQA: W605 # NOLINT
         project_p = re.compile(cmake_project_re)
 # pylint: enable=anomalous-backslash-in-string
 
@@ -90,8 +91,8 @@ class CMakeDiscoveryPlugin(DiscoveryPlugin):
                 include_dirs = match.group(3).split(";")
                 src = [src for src in match.group(4).split(";")
                        if not qt_p.match(src)]
-                src = [src if os.path.isabs(src)
-                       else os.path.join(src_dir, src) for src in src]  # NOLINT
+                src = [src if os.path.isabs(src)  # noqa F812
+                       else os.path.join(src_dir, src) for src in src]  # NOLINT  # noqa F812
 
                 target = {"name": name, "src_dir": src_dir,
                           "include_dirs": include_dirs, "src": src}

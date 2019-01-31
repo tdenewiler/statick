@@ -1,12 +1,12 @@
 """Apply uncrustify tool and gather results."""
 
 from __future__ import print_function
-import subprocess
-import shlex
-import difflib
 
-from statick_tool.tool_plugin import ToolPlugin
+import difflib
+import subprocess
+
 from statick_tool.issue import Issue
+from statick_tool.tool_plugin import ToolPlugin
 
 
 class UncrustifyToolPlugin(ToolPlugin):
@@ -31,10 +31,7 @@ class UncrustifyToolPlugin(ToolPlugin):
             uncrustify_bin = self.plugin_context.args.uncrustify_bin
 
         flags = []
-        user_flags = self.plugin_context.config.get_tool_config(self.get_name(), level, "flags")
-        lex = shlex.shlex(user_flags, posix=True)
-        lex.whitespace_split = True
-        flags = flags + list(lex)
+        flags += self.get_user_flags(level)
 
         files = []
         if "make_targets" in package:
@@ -51,9 +48,11 @@ class UncrustifyToolPlugin(ToolPlugin):
             for src in files:
                 format_file_name = self.plugin_context.resources.get_file("uncrustify.cfg")
                 cmd = [uncrustify_bin, '-c', format_file_name, '-f', src]
-                output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+                output = subprocess.check_output(cmd, stderr=subprocess.STDOUT,
+                                                 universal_newlines=True)
                 src_cmd = ['cat', src]
-                src_output = subprocess.check_output(src_cmd, stderr=subprocess.STDOUT)
+                src_output = subprocess.check_output(src_cmd, stderr=subprocess.STDOUT,
+                                                     universal_newlines=True)
                 diff = difflib.context_diff(output.split("\n"), src_output.split("\n"))
                 found_diff = False
                 output = output.split('\n', 1)[1]

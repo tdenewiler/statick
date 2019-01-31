@@ -1,13 +1,12 @@
 """Apply bandit tool and gather results."""
 
 from __future__ import print_function
+
 import csv
-
 import subprocess
-import shlex
 
-from statick_tool.tool_plugin import ToolPlugin
 from statick_tool.issue import Issue
+from statick_tool.tool_plugin import ToolPlugin
 
 
 class BanditToolPlugin(ToolPlugin):
@@ -34,11 +33,7 @@ class BanditToolPlugin(ToolPlugin):
             bandit_bin = self.plugin_context.args.bandit_bin
 
         flags = ["--format=csv"]
-        user_flags = self.plugin_context.config.get_tool_config(self.get_name(),
-                                                                level, "flags")
-        lex = shlex.shlex(user_flags, posix=True)
-        lex.whitespace_split = True
-        flags = flags + list(lex)
+        flags += self.get_user_flags(level)
 
         files = []
         if "python_src" in package:
@@ -46,7 +41,8 @@ class BanditToolPlugin(ToolPlugin):
 
         try:
             output = subprocess.check_output([bandit_bin] + flags + files,
-                                             stderr=subprocess.STDOUT)
+                                             stderr=subprocess.STDOUT,
+                                             universal_newlines=True)
 
         except subprocess.CalledProcessError as ex:
             output = ex.output
@@ -90,7 +86,7 @@ class BanditToolPlugin(ToolPlugin):
         csvreader = csv.DictReader(output_minus_log)
         for line in csvreader:
             cert_reference = None
-            if line['test_id'] in warnings_mapping.keys():
+            if line['test_id'] in warnings_mapping:
                 cert_reference = warnings_mapping[line['test_id']]
             severity = '1'
             if line['issue_confidence'] == "MEDIUM":

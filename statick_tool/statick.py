@@ -1,21 +1,23 @@
 """Code analysis front-end."""
 
 from __future__ import print_function
+
 import copy
-import os
 import logging
+import os
 
 from yapsy.PluginManager import PluginManager
+
 from statick_tool import __version__
-from statick_tool.package import Package
-from statick_tool.discovery_plugin import DiscoveryPlugin
-from statick_tool.tool_plugin import ToolPlugin
-from statick_tool.report import generate_report
-from statick_tool.exceptions import Exceptions
 from statick_tool.config import Config
-from statick_tool.profile import Profile
-from statick_tool.resources import Resources
+from statick_tool.discovery_plugin import DiscoveryPlugin
+from statick_tool.exceptions import Exceptions
+from statick_tool.package import Package
 from statick_tool.plugin_context import PluginContext
+from statick_tool.profile import Profile
+from statick_tool.report import generate_report
+from statick_tool.resources import Resources
+from statick_tool.tool_plugin import ToolPlugin
 
 logging.basicConfig()
 
@@ -38,12 +40,12 @@ class Statick(object):
         self.discovery_plugins = {}
         for plugin_info in self.manager.getPluginsOfCategory("Discovery"):
             self.discovery_plugins[plugin_info.plugin_object.get_name()] = \
-                    plugin_info.plugin_object
+                plugin_info.plugin_object
 
         self.tool_plugins = {}
         for plugin_info in self.manager.getPluginsOfCategory("Tool"):
             self.tool_plugins[plugin_info.plugin_object.get_name()] = \
-                    plugin_info.plugin_object
+                plugin_info.plugin_object
 
         self.config = Config(self.resources.get_file("config.yaml"))
 
@@ -65,10 +67,10 @@ class Statick(object):
         args.add_argument('--version', action='version',
                           version='%(prog)s {version}'.format(version=__version__))
 
-        for _, plugin in self.discovery_plugins.iteritems():
+        for _, plugin in list(self.discovery_plugins.items()):
             plugin.gather_args(args)
 
-        for _, plugin in self.tool_plugins.iteritems():
+        for _, plugin in list(self.tool_plugins.items()):
             plugin.gather_args(args)
 
     def get_level(self, path, args):
@@ -142,9 +144,9 @@ class Statick(object):
         print("---Discovery---")
         discovery_plugins = self.config.get_enabled_discovery_plugins(level)
         if len(discovery_plugins) == 0:
-            discovery_plugins = self.discovery_plugins.keys()
+            discovery_plugins = list(self.discovery_plugins.keys())
         for plugin_name in discovery_plugins:
-            if plugin_name not in self.discovery_plugins.keys():
+            if plugin_name not in self.discovery_plugins:
                 print("Can't find specified discovery plugin {}!".format(plugin_name))
                 return None, False
 
@@ -163,7 +165,7 @@ class Statick(object):
         while len(plugins_to_run) > 0:
             plugin_name = plugins_to_run[0]
 
-            if plugin_name not in self.tool_plugins.keys():
+            if plugin_name not in self.tool_plugins:
                 if plugin_name == "pep257":
                     plugin_name = "pydocstyle"
                     plugins_to_run.remove("pep257")

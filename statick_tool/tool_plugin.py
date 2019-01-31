@@ -1,5 +1,9 @@
 """Tool plugin."""
 
+from __future__ import print_function
+
+import shlex
+
 from yapsy.IPlugin import IPlugin
 
 
@@ -40,8 +44,21 @@ class ToolPlugin(IPlugin):
             for line in mapping_file.readlines():
                 split_line = line.strip().split(':')
                 if len(split_line) != 2:
-                    print "Warning: invalid line %s in file %s" % \
-                          (line, file_name)
+                    print("Warning: invalid line %s in file %s" %
+                          (line, file_name))
                     continue
                 warning_mapping[split_line[0]] = split_line[1]
         return warning_mapping
+
+    def get_user_flags(self, level, name=None):
+        """Get the user-defined extra flags for a specific tool/level combination."""
+        if name is None:
+            name = self.get_name()
+        user_flags = self.plugin_context.config.get_tool_config(name, level,
+                                                                "flags")
+        flags = []
+        if user_flags:
+            lex = shlex.shlex(user_flags, posix=True)
+            lex.whitespace_split = True
+            flags = list(lex)
+        return flags

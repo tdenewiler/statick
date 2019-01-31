@@ -1,13 +1,13 @@
 """Apply Cpplint tool and gather results."""
 
 from __future__ import print_function
-import subprocess
-import shlex
-import re
-import os
 
-from statick_tool.tool_plugin import ToolPlugin
+import os
+import re
+import subprocess
+
 from statick_tool.issue import Issue
+from statick_tool.tool_plugin import ToolPlugin
 
 
 class CpplintToolPlugin(ToolPlugin):
@@ -30,12 +30,8 @@ class CpplintToolPlugin(ToolPlugin):
         if "make_targets" not in package and "headers" not in package:
             return []
 
-        user_flags = self.plugin_context.config.get_tool_config(self.get_name(),
-                                                                level, "flags")
-        lex = shlex.shlex(user_flags, posix=True)
-        lex.whitespace_split = True
-        flags = list(lex)
-
+        flags = []
+        flags += self.get_user_flags(level)
         cpplint = package["cpplint"]
 
         files = []
@@ -45,7 +41,8 @@ class CpplintToolPlugin(ToolPlugin):
 
         try:
             output = subprocess.check_output([cpplint] + flags + files,
-                                             stderr=subprocess.STDOUT)
+                                             stderr=subprocess.STDOUT,
+                                             universal_newlines=True)
         except subprocess.CalledProcessError as ex:
             output = ex.output
             if ex.returncode != 1:

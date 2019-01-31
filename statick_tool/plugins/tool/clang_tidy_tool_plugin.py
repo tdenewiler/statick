@@ -1,12 +1,12 @@
 """Apply clang-tidy tool and gather results."""
 
 from __future__ import print_function
-import subprocess
-import shlex
-import re
 
-from statick_tool.tool_plugin import ToolPlugin
+import re
+import subprocess
+
 from statick_tool.issue import Issue
+from statick_tool.tool_plugin import ToolPlugin
 
 
 class ClangTidyToolPlugin(ToolPlugin):
@@ -35,14 +35,10 @@ class ClangTidyToolPlugin(ToolPlugin):
         if self.plugin_context.args.clang_tidy_bin is not None:
             clang_tidy_bin = self.plugin_context.args.clang_tidy_bin
 
-        flags = ["-header-filter="+package["src_dir"]+"/.*", "-p",
-                 package["bin_dir"]+"/compile_commands.json",
+        flags = ["-header-filter=" + package["src_dir"] + "/.*", "-p",
+                 package["bin_dir"] + "/compile_commands.json",
                  "-extra-arg=-fopenmp=libomp"]
-        user_flags = self.plugin_context.config.get_tool_config(self.get_name(),
-                                                                level, "flags")
-        lex = shlex.shlex(user_flags, posix=True)
-        lex.whitespace_split = True
-        flags = flags + list(lex)
+        flags += self.get_user_flags(level)
 
         files = []
         if "make_targets" in package:
@@ -51,7 +47,8 @@ class ClangTidyToolPlugin(ToolPlugin):
 
         try:
             output = subprocess.check_output([clang_tidy_bin] + flags + files,
-                                             stderr=subprocess.STDOUT)
+                                             stderr=subprocess.STDOUT,
+                                             universal_newlines=True)
             if "clang-diagnostic-error" in output:
                 raise subprocess.CalledProcessError(-1,
                                                     clang_tidy_bin,
@@ -100,7 +97,7 @@ class ClangTidyToolPlugin(ToolPlugin):
                 if line[1] != '*' and match.group(3) != "information" \
                         and match.group(4) != "note":
                     cert_reference = None
-                    if match.group(6) in warnings_mapping.keys():
+                    if match.group(6) in warnings_mapping:
                         cert_reference = warnings_mapping[match.group(6)]
                     issues.append(Issue(match.group(1), match.group(2),
                                         self.get_name(), match.group(4) +

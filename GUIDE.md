@@ -183,6 +183,8 @@ There are two types of exceptions.
 The `tools` key can either be `all` to suppress warnings from all tools or a list of specific tools.
 The `globs` key is a list of globs of files to ignore.
 The glob could also be a specific filename.
+For an exception to be applied to a specific issue, it is required that the issue contain an absolute path to the filename.
+The path for the issue is set in the tool plugin that generates the issues.
 
 `message_regex` exceptions ignore warnings based on a regular expression match against an error message.
 The `tools` key can either be `all` to suppress warnings from all tools or a list of specific tools.
@@ -216,6 +218,26 @@ A user path with some custom plugins may look like
          |- exceptions.yaml
 
 For the actual implementation of a plugin, it is recommended to copy a suitable default plugin provided by Statick and modify as needed.
+
+# Tests
+
+Statick supports testing through the [tox](https://tox.readthedocs.io/en/latest) framework. Tox is used to run tests against multiple
+versions of python and supports running other tools, such as flake8, as part of the testing process. To run tox, run the following commands
+from a git checkout of `statick`:
+
+    `pip install tox`
+    `tox`
+
+This will run the test suites in Python virtual environments for each Python version. If your system does not have one of the Python versions
+listed in `tox.ini`, that version will be skipped.
+
+## Tests and Contributing
+
+If you write a new feature for Statick or are fixing a bug, you are strongly encouraged to add unit tests for your contribution. In particular,
+it is much easier to test whether a bug is fixed (and identify future regressions) if you can add a small unit test which replicates the bug.
+
+Before submitting a change, please run tox to check that you have not introduced any regressions or violated any code style guidelines. 
+
 
 # Examples
 

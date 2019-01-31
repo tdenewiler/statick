@@ -5,4 +5,6 @@ pycodestyle
 pydocstyle
 pyflakes
 pylint-django<2.0
+PyYAML
 yamllint
+yapsy

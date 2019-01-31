@@ -1,13 +1,13 @@
 """Apply cmakelint tool and gather results."""
 
 from __future__ import print_function
-import subprocess
-import shlex
-import re
-import os
 
-from statick_tool.tool_plugin import ToolPlugin
+import os
+import re
+import subprocess
+
 from statick_tool.issue import Issue
+from statick_tool.tool_plugin import ToolPlugin
 
 
 class CMakelintToolPlugin(ToolPlugin):
@@ -22,12 +22,8 @@ class CMakelintToolPlugin(ToolPlugin):
         if "cmake" not in package or not package["cmake"]:
             # Package is not cmake!
             return []
-
-        user_flags = self.plugin_context.config.get_tool_config(self.get_name(),
-                                                                level, "flags")
-        lex = shlex.shlex(user_flags, posix=True)
-        lex.whitespace_split = True
-        flags = list(lex)
+        flags = []
+        flags += self.get_user_flags(level)
 
         output = ""
         cmake_file = os.path.join(package.path, "CMakeLists.txt")
@@ -35,7 +31,8 @@ class CMakelintToolPlugin(ToolPlugin):
         try:
             subproc_args = ["cmakelint"] + flags + [cmake_file]
             output = subprocess.check_output(subproc_args,
-                                             stderr=subprocess.STDOUT)
+                                             stderr=subprocess.STDOUT,
+                                             universal_newlines=True)
         except subprocess.CalledProcessError as ex:
             if ex.returncode == 1:
                 output = ex.output

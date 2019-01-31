@@ -1,12 +1,12 @@
 """Apply pylint tool and gather results."""
 
 from __future__ import print_function
-import subprocess
-import shlex
-import re
 
-from statick_tool.tool_plugin import ToolPlugin
+import re
+import subprocess
+
 from statick_tool.issue import Issue
+from statick_tool.tool_plugin import ToolPlugin
 
 
 class PylintToolPlugin(ToolPlugin):
@@ -20,11 +20,7 @@ class PylintToolPlugin(ToolPlugin):
         """Run tool and gather output."""
         flags = ["--msg-template='{abspath}:{line}: [{msg_id}({symbol}), "
                  "{obj}] {msg}'", "--reports=no"]
-        user_flags = self.plugin_context.config.get_tool_config(self.get_name(),
-                                                                level, "flags")
-        lex = shlex.shlex(user_flags, posix=True)
-        lex.whitespace_split = True
-        flags = flags + list(lex)
+        flags += self.get_user_flags(level)
 
         total_output = []
 
@@ -32,7 +28,8 @@ class PylintToolPlugin(ToolPlugin):
             try:
                 subproc_args = ["pylint", src] + flags
                 output = subprocess.check_output(subproc_args,
-                                                 stderr=subprocess.STDOUT)
+                                                 stderr=subprocess.STDOUT,
+                                                 universal_newlines=True)
 
             except subprocess.CalledProcessError as ex:
                 if ex.returncode != 32:

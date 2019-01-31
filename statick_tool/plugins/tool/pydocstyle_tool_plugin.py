@@ -1,12 +1,12 @@
 """Apply pydocstyle tool and gather results."""
 
 from __future__ import print_function
-import subprocess
-import shlex
-import re
 
-from statick_tool.tool_plugin import ToolPlugin
+import re
+import subprocess
+
 from statick_tool.issue import Issue
+from statick_tool.tool_plugin import ToolPlugin
 
 
 class PydocstyleToolPlugin(ToolPlugin):
@@ -19,25 +19,19 @@ class PydocstyleToolPlugin(ToolPlugin):
     def scan(self, package, level):
         """Run tool and gather output."""
         flags = []
-        user_flags = self.plugin_context.config.get_tool_config(self.get_name(),
-                                                                level, "flags")
+        user_flags = self.get_user_flags(level)
         # This check is done to support the switch from the pep257 package name
         # to the pydocstyle package name. See:
         # https://github.com/PyCQA/pydocstyle/issues/172
         # We want to support the old tool name in configuration files for a
         # while.
         if user_flags is None:
-            user_flags = self.plugin_context.config.get_tool_config("pep257",
-                                                                    level,
-                                                                    "flags")
+            user_flags = self.get_user_flags(level, "pep257")
             if user_flags is not None:
                 print("DEPRECATION WARNING: The tool name changed from pep257 to "
                       "pydocstyle. Please update your configuration file to "
                       "use the new tool name.")
-        lex = shlex.shlex(user_flags, posix=True)
-        lex.whitespace_split = True
-        flags = flags + list(lex)
-
+        flags += user_flags
         total_output = []
 
         tool_bin = "pydocstyle"
@@ -45,7 +39,8 @@ class PydocstyleToolPlugin(ToolPlugin):
             try:
                 subproc_args = [tool_bin, src] + flags
                 output = subprocess.check_output(subproc_args,
-                                                 stderr=subprocess.STDOUT)
+                                                 stderr=subprocess.STDOUT,
+                                                 universal_newlines=True)
 
             except subprocess.CalledProcessError as ex:
                 if ex.returncode != 32:

@@ -74,6 +74,9 @@ class CMakeDiscoveryPlugin(DiscoveryPlugin):
             "-DCATKIN_SKIP_TESTING=ON",
         ]  # type: List[str]
 
+        if "cmake_flags" in package and package["cmake_flags"]:
+            default_flags.append(package["cmake_flags"])
+
         path_flags = [
             "-DINPUT_DIR=" + package.path,
             "-DSTATICK_EXTRA_GCC_FLAGS=" + extra_gcc_flags,

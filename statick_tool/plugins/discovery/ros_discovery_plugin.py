@@ -24,11 +24,13 @@ class RosDiscoveryPlugin(DiscoveryPlugin):
         if os.path.isfile(cmake_file) and os.path.isfile(package_file):
             print("  Package is ROS.")
             package["ros"] = True
-            if os.getenv('ROS_VERSION') == '2':
-                distro = os.getenv('ROS_DISTRO')
-                for path in os.getenv('PATH').split(":"):
-                    if distro in path:
-                        package["cmake_flags"] = path.rstrip("/bin")
+            if os.getenv("ROS_VERSION") == "2":
+                distro = os.getenv("ROS_DISTRO")
+                for path in os.getenv("PATH").split(":"):
+                    if distro is not None and distro in path:
+                        package["cmake_flags"] = "-DCMAKE_PREFIX_PATH=" + path.rstrip(
+                            "/bin"
+                        )
                         print("  Adding CMake flags: {}".format(package["cmake_flags"]))
         else:
             print("  Package is not ROS.")

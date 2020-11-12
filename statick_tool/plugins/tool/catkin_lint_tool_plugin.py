@@ -18,7 +18,9 @@ class CatkinLintToolPlugin(ToolPlugin):
 
     def scan(self, package: Package, level: str) -> Optional[List[Issue]]:
         """Run tool and gather output."""
-        if "catkin" not in package or not package["catkin"]:
+        if ("catkin" not in package or not package["catkin"]) and (
+            "ros" not in package or not package["ros"]
+        ):
             return []
 
         flags = []  # type: List[str]

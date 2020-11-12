@@ -18,6 +18,11 @@ class CMakeDiscoveryPlugin(DiscoveryPlugin):
         """Get name of discovery type."""
         return "cmake"
 
+    @classmethod
+    def get_discovery_dependencies(cls) -> List[str]:
+        """Get a list of plugins that must run before this one."""
+        return ["ros"]
+
     def gather_args(self, args: argparse.Namespace) -> None:
         """Gather arguments."""
         args.add_argument(

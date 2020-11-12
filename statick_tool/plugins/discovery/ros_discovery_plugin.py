@@ -22,7 +22,7 @@ class RosDiscoveryPlugin(DiscoveryPlugin):
         package_file = os.path.join(package.path, "package.xml")
 
         if os.path.isfile(cmake_file) and os.path.isfile(package_file):
-            print("  Package is ROS.")
+            print("  Package is ROS{}.".format(os.getenv("ROS_VERSION")))
             package["ros"] = True
             if os.getenv("ROS_VERSION") == "2":
                 distro = os.getenv("ROS_DISTRO")

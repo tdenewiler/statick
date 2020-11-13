@@ -126,3 +126,16 @@ def test_ros_discovery_plugin_ros2_scan_valid():
         os.environ["ROS_DISTRO"] = "foxy"
         rdp.scan(package, "level")
         assert package["ros"]
+
+
+def test_ros_discovery_plugin_ros1_scan_valid():
+    """Test the behavior when the ROS plugin scans a valid package in a ROS1
+    environment."""
+    rdp = RosDiscoveryPlugin()
+    package = Package(
+        "valid_package", os.path.join(os.path.dirname(__file__), "valid_package")
+    )
+    os.environ["ROS_VERSION"] = "1"
+    rdp.scan(package, "level")
+    assert package["ros"]
+    assert package["catkin"]

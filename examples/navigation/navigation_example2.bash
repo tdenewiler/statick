@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Example script for running statick against a single ROS package
 
 if [ ! -d src ]; then 

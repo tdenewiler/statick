@@ -38,7 +38,7 @@ global:
       # VCS directories
       - tools: all
         globs: ["*/.svn/*", "*/.git/*", "*/.hg/*"]
-      # Shell script used to install Node packages in continuous integration.
+      # Shell script used to install Node packages in continuous integration. We can't/don't modify the file.
       - tools: [shellcheck]
         globs: ["*/nodesource_setup.sh"]
     message_regex:

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Example script for running statick against an entire catkin workspace
 
 if [ ! -d src ]; then 

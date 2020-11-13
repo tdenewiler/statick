@@ -265,6 +265,8 @@ class Statick:
             dependencies = plugin.get_discovery_dependencies()
             for dependency_name in dependencies:
                 dependency_plugin = self.discovery_plugins[dependency_name]
+                if dependency_plugin.get_name() in plugins_ran:
+                    continue
                 dependency_plugin.set_plugin_context(plugin_context)
                 print(
                     "Running {} discovery plugin...".format(
@@ -280,6 +282,7 @@ class Statick:
                 print("Running {} discovery plugin...".format(plugin.get_name()))
                 plugin.scan(package, level, self.exceptions)
                 print("{} discovery plugin done.".format(plugin.get_name()))
+                plugins_ran.append(plugin.get_name())
         print("---Discovery---")
 
         print("---Tools---")

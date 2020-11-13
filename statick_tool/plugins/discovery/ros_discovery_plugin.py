@@ -28,11 +28,13 @@ class RosDiscoveryPlugin(DiscoveryPlugin):
                 package["catkin"] = True
             elif os.getenv("ROS_VERSION") == "2":
                 distro = os.getenv("ROS_DISTRO")
-                for path in os.getenv("PATH").split(":"):
-                    if distro is not None and distro in path:
-                        package["cmake_flags"] = "-DCMAKE_PREFIX_PATH=" + path.rstrip(
-                            "/bin"
-                        )
+                path = os.getenv("PATH")
+                if path is not None:
+                    for item in path.split(":"):
+                        if distro is not None and distro in item:
+                            package[
+                                "cmake_flags"
+                            ] = "-DCMAKE_PREFIX_PATH=" + item.rstrip("/bin")
         else:
             print("  Package is not ROS.")
             package["ros"] = False

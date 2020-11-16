@@ -29,9 +29,9 @@ class RosDiscoveryPlugin(DiscoveryPlugin):
         ):
             print("  Package is ROS{}.".format(ros_version))
             package["ros"] = True
-            if os.getenv("ROS_VERSION") == "1":
+            if ros_version == "1":
                 package["catkin"] = True
-            elif os.getenv("ROS_VERSION") == "2":
+            elif ros_version == "2":
                 distro = os.getenv("ROS_DISTRO")
                 path = os.getenv("PATH")
                 if path is not None:

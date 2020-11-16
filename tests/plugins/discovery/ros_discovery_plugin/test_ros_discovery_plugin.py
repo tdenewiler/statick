@@ -13,8 +13,7 @@ from statick_tool.plugins.discovery.ros_discovery_plugin import RosDiscoveryPlug
 # From https://stackoverflow.com/questions/2059482/python-temporarily-modify-the-current-processs-environment
 @contextlib.contextmanager
 def modified_environ(*remove, **update):
-    """
-    Temporarily updates the ``os.environ`` dictionary in-place.
+    """Temporarily updates the ``os.environ`` dictionary in-place.
 
     The ``os.environ`` dictionary is updated in-place so that the modification
     is sure to work in all situations.
@@ -73,8 +72,21 @@ def test_ros_discovery_plugin_scan_valid():
     package = Package(
         "valid_package", os.path.join(os.path.dirname(__file__), "valid_package")
     )
+    os.environ["ROS_VERSION"] = "1"
     rdp.scan(package, "level")
     assert package["ros"]
+
+
+def test_ros_discovery_plugin_scan_invalid_no_ros_distro():
+    """Test the behavior when the ROS plugin scans a valid package but no ROS
+    environment has been set."""
+    rdp = RosDiscoveryPlugin()
+    package = Package(
+        "valid_package", os.path.join(os.path.dirname(__file__), "valid_package")
+    )
+    del os.environ["ROS_VERSION"]
+    rdp.scan(package, "level")
+    assert not package["ros"]
 
 
 def test_ros_discovery_plugin_scan_invalid_badpath():
@@ -83,6 +95,7 @@ def test_ros_discovery_plugin_scan_invalid_badpath():
     package = Package(
         "invalid_package", os.path.join(os.path.dirname(__file__), "invalid_package")
     )
+    os.environ["ROS_VERSION"] = "1"
     rdp.scan(package, "level")
     assert not package["ros"]
 
@@ -95,6 +108,7 @@ def test_ros_discovery_plugin_scan_invalid_nocmake():
         "invalid_package_nocmakelists",
         os.path.join(os.path.dirname(__file__), "invalid_package_nocmakelists"),
     )
+    os.environ["ROS_VERSION"] = "1"
     rdp.scan(package, "level")
     assert not package["ros"]
 
@@ -107,6 +121,7 @@ def test_ros_discovery_plugin_scan_invalid_packagexml():
         "invalid_package_nopackagexml",
         os.path.join(os.path.dirname(__file__), "invalid_package_nopackagexml"),
     )
+    os.environ["ROS_VERSION"] = "1"
     rdp.scan(package, "level")
     assert not package["ros"]
 

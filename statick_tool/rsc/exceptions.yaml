@@ -40,7 +40,7 @@ global:
         globs: ["*/.svn/*", "*/.git/*", "*/.hg/*"]
       # Shell script used to install Node packages in continuous integration. We can't/don't modify the file.
       - tools: [shellcheck]
-        globs: ["*/nodesource_setup.sh"]
+        globs: ["nodesource_setup.sh"]
     message_regex:
       # This is triggered by std::isnan for some reason
       - tools: [clang-tidy]

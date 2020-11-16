@@ -20,9 +20,14 @@ class RosDiscoveryPlugin(DiscoveryPlugin):
         """Scan package looking for ROS package files."""
         cmake_file = os.path.join(package.path, "CMakeLists.txt")
         package_file = os.path.join(package.path, "package.xml")
+        ros_version = os.getenv("ROS_VERSION")
 
-        if os.path.isfile(cmake_file) and os.path.isfile(package_file):
-            print("  Package is ROS{}.".format(os.getenv("ROS_VERSION")))
+        if (
+            os.path.isfile(cmake_file)
+            and os.path.isfile(package_file)
+            and ros_version is not None
+        ):
+            print("  Package is ROS{}.".format(ros_version))
             package["ros"] = True
             if os.getenv("ROS_VERSION") == "1":
                 package["catkin"] = True

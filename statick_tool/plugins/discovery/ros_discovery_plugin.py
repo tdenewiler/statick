@@ -46,7 +46,10 @@ class RosDiscoveryPlugin(DiscoveryPlugin):
             with open(package_file) as fconfig:
                 try:
                     output = xmltodict.parse(fconfig.read())
-                except (xmltodict.expat.ExpatError, xmltodict.ParsingInterrupted) as exc:
+                except (
+                    xmltodict.expat.ExpatError,
+                    xmltodict.ParsingInterrupted,
+                ) as exc:
                     # No valid XML found, so we are not going to find the build type.
                     package["ros"] = False
                     print("  Invalid XML in {}: {}".format(package_file, exc))

@@ -35,7 +35,6 @@ setup(
             "rsc/.*",
             "rsc/*",
             "rsc/plugin_mapping/.*",
-            "rsc/plugin_mapping/*",
             "plugins/*.py",
             "plugins/discovery/*",
             "plugins/tool/*",

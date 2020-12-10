@@ -33,6 +33,7 @@ setup(
     package_data={
         "statick_tool": [
             "rsc/*.cfg",
+            "rsc/*.in",
             "rsc/*.opt",
             "rsc/*.xml",
             "rsc/*.yaml",

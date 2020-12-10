@@ -32,6 +32,10 @@ setup(
     packages=["statick_tool"],
     package_data={
         "statick_tool": [
+            "rsc/*.cfg",
+            "rsc/*.opt",
+            "rsc/*.xml",
+            "rsc/*.yaml",
             "rsc/.*",
             "rsc/plugin_mapping/.*",
             "plugins/*.py",

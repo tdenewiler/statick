@@ -34,6 +34,7 @@ setup(
         "statick_tool": [
             "rsc/.*",
             "rsc/*",
+            "rsc/plugin_mapping/.*",
             "rsc/plugin_mapping/*",
             "plugins/*.py",
             "plugins/discovery/*",

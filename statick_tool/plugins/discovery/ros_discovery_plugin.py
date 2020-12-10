@@ -1,5 +1,6 @@
 """Discovery plugin to find ROS packages."""
 import os
+from functools import reduce
 from typing import Optional
 
 import xmltodict
@@ -15,6 +16,19 @@ class RosDiscoveryPlugin(DiscoveryPlugin):
     def get_name(self) -> str:
         """Get name of discovery type."""
         return "ros"
+
+    @classmethod
+    def deep_get(cls, dictionary, keys, default=None):
+        """Safe way to check for a value in a nested dict.
+
+        Copied from:
+        https://stackoverflow.com/questions/25833613/python-safe-method-to-get-value-of-nested-dictionary
+        """
+        return reduce(
+            lambda d, key: d.get(key, default) if isinstance(d, dict) else default,
+            keys.split("."),
+            dictionary,
+        )
 
     def scan(
         self, package: Package, level: str, exceptions: Optional[Exceptions] = None
@@ -54,10 +68,7 @@ class RosDiscoveryPlugin(DiscoveryPlugin):
                     package["ros"] = False
                     print("  Invalid XML in {}: {}".format(package_file, exc))
                     return
-                if (
-                    output["package"]["export"]["build_type"] is not None
-                    and output["package"]["export"]["build_type"] == "ament_python"
-                ):
+                if self.deep_get(output, "package.export.build_type") == "ament_python":
                     print("  Package is ROS{}.".format(ros_version))
                     package["ros"] = True
         else:

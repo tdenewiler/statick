@@ -33,7 +33,7 @@ setup(
     package_data={
         "statick_tool": [
             "rsc/.*",
-            "rsc/*",
+            "rsc/plugin_mapping/.*",
             "plugins/*.py",
             "plugins/discovery/*",
             "plugins/tool/*",

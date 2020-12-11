@@ -1,7 +1,7 @@
 """Discovery plugin to find ROS packages."""
 import os
 from functools import reduce
-from typing import Optional
+from typing import Any, Dict, Optional, Union
 
 import xmltodict
 
@@ -18,7 +18,12 @@ class RosDiscoveryPlugin(DiscoveryPlugin):
         return "ros"
 
     @classmethod
-    def deep_get(cls, dictionary, keys, default=None):
+    def deep_get(
+        cls,
+        dictionary: Union[str, Dict[Any, str]],
+        keys: str,
+        default: Optional[str] = None,
+    ) -> Any:
         """Safe way to check for a value in a nested dict.
 
         Copied from:

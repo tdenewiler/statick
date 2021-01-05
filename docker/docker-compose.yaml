@@ -1,13 +1,10 @@
 version: "3.3"
 services:
   statick:
-    image: tdenewiler/statick:latest
+    image: statick:latest
     container_name: statick
-    user: statick
+    environment:
+      - STATICK_PROFILE=profile.yaml
     volumes:
-      - $PKG:/tmp/pkg
-      - $CONFIG:/tmp/statick_config
-    command: bash -c "
-      cp /usr/local/lib/python3.7/site-packages/statick_tool/rsc/_clang-format /home/statick/_clang-format &&
-      statick /tmp/pkg --user-paths /tmp/statick_config
-      "
+      - ${STATICK_PACKAGE}:/tmp/statick_package
+      - ${STATICK_CONFIG}:/tmp/statick_config

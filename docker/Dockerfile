@@ -1,39 +1,56 @@
-FROM python:3.7-slim-buster
+FROM ubuntu:20.04
 
-LABEL Name = "Statick"
-LABEL Maintainer = "NIWC"
-LABEL Version = "0.4.4"
+LABEL "com.github.actions.name"="Statick"
+LABEL "com.github.actions.description"="Making code quality easier."
+LABEL "com.github.actions.icon"="check-circle"
+LABEL "com.github.actions.color"="blue"
+
+LABEL "repository"="https://github.com/sscpac/statick.git"
+LABEL "homepage"="https://github.com/sscpac/statick"
+LABEL "maintainer"="Thomas Denewiler <tdenewiler@gmail.com>"
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 USER root
 
-RUN mkdir -p /usr/share/man/man1
-
-RUN apt update && apt install -y \
+RUN apt update && apt install -y --no-install-recommends \
     bandit \
     build-essential \
+    cccc \
     chktex \
     clang \
     clang-6.0 \
+    clang-10 \
     clang-format \
     clang-format-6.0 \
+    clang-format-10 \
     clang-tidy \
     clang-tidy-6.0 \
+    clang-tidy-10 \
     cmake \
     cppcheck \
+    curl \
+    file \
+    findbugs \
     flawfinder \
     git \
     lacheck \
     libomp-dev \
     libperl-critic-perl \
     libxml2 \
+    libxml2-utils \
     maven \
     pylint \
+    python3-pip \
     python3-pylint-django \
     python3-yaml \
     python3-yapsy \
+    shellcheck \
+    uncrustify \
     wget
-RUN pip install --upgrade pip
-RUN pip install \
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install \
+    black \
     cmakelint \
     cpplint \
     flake8 \
@@ -44,6 +61,7 @@ RUN pip install \
     flake8-docstrings \
     flake8-import-order \
     flake8-quotes \
+    mypy \
     lizard \
     statick \
     statick-md \
@@ -51,6 +69,23 @@ RUN pip install \
     statick-web \
     yamllint
 
-RUN useradd -ms /bin/bash statick
-USER statick
-WORKDIR /home/statick
+# Statick npm tools.
+# Have to install newer version from non-apt source due to SSL library compatibility issues.
+RUN curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh
+RUN bash nodesource_setup.sh
+RUN apt update && apt install -y nodejs
+RUN npm config set prefix -g /usr
+RUN npm install -g \
+    prettier \
+    eslint@5.16.0 \
+    eslint-plugin-html \
+    eslint-plugin-prettier \
+    eslint-config-prettier \
+    htmllint-cli \
+    markdownlint-cli@0.21.0 \
+    stylelint \
+    stylelint-config-standard
+
+COPY entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["package"]

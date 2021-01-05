@@ -40,7 +40,7 @@ class CCCCToolPlugin(ToolPlugin):
         self, package: Package, level: str
     ) -> Optional[List[Issue]]:
         """Run tool and gather output."""
-        if "c_src" not in package.keys():
+        if "c_src" not in package.keys() or not package["c_src"]:
             return []
 
         if self.plugin_context is None:
@@ -134,8 +134,7 @@ class CCCCToolPlugin(ToolPlugin):
 
     @classmethod
     def parse_config(cls, config_file: str) -> Dict[str, str]:
-        """
-        Parse CCCC configuration file.
+        """Parse CCCC configuration file.
 
         Gets warning and error thresholds for all the metrics.
         An explanation to dump default values to a configuration file is at:
@@ -210,12 +209,11 @@ class CCCCToolPlugin(ToolPlugin):
 
     @classmethod
     def convert_name_to_id(cls, name: str) -> str:  # pylint: disable=too-many-branches
-        """
-        Convert result name to configuration name.
+        """Convert result name to configuration name.
 
         The name given in CCCC results is different than the name given in CCCC
-        configuration. This will map the name in the configuration file to the
-        name given in the results.
+        configuration. This will map the name in the configuration file to the name
+        given in the results.
         """
         name_id = ""
 

@@ -12,6 +12,91 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Removed
 
+## v0.4.11 - 2020-12-22
+
+### Added
+
+- A big speedup improvement of roughly 3x was implemented for the discovery phase.
+  The main discovery plugin will now walk through the filesystem once per package and cache information about absolute
+  file paths and `file` command output.
+  Each discovery plugin can now use that cached information instead of walking the filesystem itself. (@xydesa)
+- Any directory with `COLCON_IGNORE` (and all of its subdirectories) will be ignored by `statick_ws`.
+  This is a standard file used by ROS2 to indicate that a ROS2 package should be ignored. (@xydesa)
+
+## v0.4.10 - 2020-12-15
+
+### Added
+
+- Add support to ROS discovery plugin for ROS2 Python-only packages that do not contain `CMakeLists.txt`.
+  Second attempt that fixed some bugs from first attempt.
+- Add section to the `README` about `statick_ws` usage.
+- Convert `lizard` tool plugin to use Python API and support user flags. (@jhdcs)
+
+### Fixed
+
+- Remove `~/_clang-format` after each unit test where it is copied to the home directory.
+- Fix bug in lizard tool plugin where the directory to scan for files was not set properly.
+  Thanks @jhdcs for finding the bug.
+- Ignoring any subdirectories in `statick_ws` if the current directory contains `CATKIN_IGNORE` or `AMENT_IGNORE`. (@xydesa)
+
+## v0.4.9 - 2020-12-09
+
+### Fixed
+
+- Reverted changes to ROS discovery plugin to support Python-only packages.
+  Those changes were causing crashes for some users.
+  We will get those changes back into a future release, but take out the bugs.
+
+## v0.4.8 - 2020-12-09
+
+### Added
+
+- The ROS discovery plugin now supports Python-only packages that do not contain a `CMakeLists.txt` file.
+- Improved the output of the cpplint tool plugin.
+  When no make targets or C/C++ headers have been discovered the tool no longer gives confusing message about the
+  cpplint executable not being found.
+
+## v0.4.7 - 2020-11-25
+
+### Fixed
+
+- Fix bug in CCCC tool plugin where an empty list of source files results in trying to print output before it is available.
+  The result of the bug was the Statick tool crashing.
+- Fix title underlines in documentation files.
+  Based on sphinx linting feedback from ammaraskar/sphinx-action.
+
+## v0.4.6 - 2020-11-18
+
+### Added
+
+Date:   Tue Nov 17 08:17:55 2020 -0800
+
+- Add Python 3.9 support.
+  All unit tests and self checks are performed using Python 3.9.
+  This required modifying the `self_check` configuration to disable the pylint flag `--unsubscriptable-object` due
+  to documented issues with pylint, Python 3.9, and type hints.
+- Add new ROS discovery plugin.
+- Add feature that allows discovery plugins to depend on other discovery plugins, necessary for getting additional
+  CMake flags from ROS discovery plugin to the CMake disocvery plugin.
+
+### Deprecated
+
+- The catkin discovery plugin is now marked as deprecated since the ROS discovery plugin is more general.
+  For now both plugins run by default, but the catkin discovery plugin will be removed in a future version.
+
+## v0.4.5 - 2020-11-12
+
+### Added
+
+- Generate and publish Sphinx documentation to GitHub Pages on all new releases.
+- Add discovery plugin to find shell files.
+- Add tool plugin for [shellcheck](https://www.shellcheck.net/).
+- Update documentation to list plugin types and link to tool documentation.
+
+### Fixed
+
+- Fix for running `cmake_discovery_plugin` with some ROS 2 packages that contain messages. (@xydesa)
+
 ## v0.4.4 - 2020-10-16
 
 ### Fixed

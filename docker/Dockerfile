@@ -53,6 +53,7 @@ RUN python3 -m pip install \
     black \
     cmakelint \
     cpplint \
+    docformatter \
     flake8 \
     flake8-blind-except \
     flake8-builtins \

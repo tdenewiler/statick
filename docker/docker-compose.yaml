@@ -1,7 +1,7 @@
 version: "3.3"
 services:
   statick:
-    image: statick:latest
+    image: tdenewiler/statick:latest
     container_name: statick
     environment:
       - STATICK_PROFILE=profile.yaml

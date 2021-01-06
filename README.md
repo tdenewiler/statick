@@ -49,8 +49,9 @@ Statick is a plugin-based tool with an explicit goal to support external, option
   * [Custom Cppcheck Configuration](#custom-cppcheck-configuration)
   * [Custom CMake Flags](#custom-cmake-flags)
 * [Custom Plugins](#custom-plugins)
-* [ROS Workspaces](#ros-workspaces)
 * [Examples](#examples)
+* [ROS Workspaces](#ros-workspaces)
+* [Docker](#docker)
 * [Troubleshooting](#troubleshooting)
   * [Make Tool Plugin](#make-tool-plugin)
   * [CMake Discovery Plugin](#cmake-discovery-plugin)
@@ -535,6 +536,16 @@ Statick can also run against a subset of the source directory in a ROS workspace
 
 ```shell
 statick_ws /home/user/ws/src/subdir --output-directory <output directory>
+```
+
+## Docker
+
+There is experimental support for using Statick as a Docker container with docker-compose.
+Up to this point, most of the testing has been done on simple pure Python packages.
+In the `docker/` directory you can run the following to have Statick analyze a package (assume it is called `my_pkg`).
+
+```shell
+STATICK_PACKAGE=~/my_pkg STATICK_CONFIG=~/my_pkg/statick_config/ docker-compose up
 ```
 
 ## Troubleshooting

@@ -232,3 +232,35 @@ levels:
         version: "6.0"
       clang-tidy:
         version: "6.0"
+
+  python:
+    discovery:
+      - python
+    reporting:
+      - print_to_console
+    tool:
+      bandit:
+        flags: ""
+      black:
+        flags: ""
+      cccc:
+        flags: ""
+      docformatter:
+        flags: "--wrap-summaries 88 --wrap-descriptions 88"
+      lizard:
+        flags: ""
+      mypy:
+        flags: ""
+      pycodestyle:
+        # Make line length consistent with default for black.
+        flags: "--max-line-length=88"
+      pydocstyle:
+        flags: ""
+      pyflakes:
+        flags: ""
+      # Disabling bad-continuation so black formatting will work.
+      # https://github.com/psf/black/blob/master/README.md#how-black-wraps-lines
+      # https://github.com/psf/black/issues/48
+      # https://github.com/PyCQA/pylint/issues/289
+      pylint:
+        flags: "--disable=bad-continuation"

@@ -26,6 +26,7 @@ def setup_spotbugs_tool_plugin(use_plugin_context=True, custom_rsc_path=None):
         action="store_false",
         help="Show tool output",
     )
+    arg_parser.add_argument("--verbose", dest="verbose")
     arg_parser.add_argument(
         "--mapping-file-suffix", dest="mapping_file_suffix", type=str
     )

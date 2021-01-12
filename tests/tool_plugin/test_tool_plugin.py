@@ -27,6 +27,7 @@ def test_tool_plugin_load_mapping_valid():
         "--mapping-file-suffix", dest="mapping_file_suffix", type=str
     )
     arg_parser.add_argument("--output-directory", dest="output_directory")
+    arg_parser.add_argument("--verbose", dest="verbose")
     resources = Resources([os.path.join(os.path.dirname(__file__), "good_config")])
     plugin_context = PluginContext(arg_parser.parse_args([]), resources, None)
     tp = ToolPlugin()
@@ -42,6 +43,7 @@ def test_tool_plugin_load_mapping_invalid():
     arg_parser.add_argument(
         "--mapping-file-suffix", dest="mapping_file_suffix", type=str
     )
+    arg_parser.add_argument("--verbose", dest="verbose")
     resources = Resources([os.path.join(os.path.dirname(__file__), "bad_config")])
     plugin_context = PluginContext(arg_parser.parse_args([]), resources, None)
     tp = ToolPlugin()
@@ -56,6 +58,7 @@ def test_tool_plugin_load_mapping_missing():
     arg_parser.add_argument(
         "--mapping-file-suffix", dest="mapping_file_suffix", type=str
     )
+    arg_parser.add_argument("--verbose", dest="verbose")
     resources = Resources([os.path.join(os.path.dirname(__file__), "missing_config")])
     plugin_context = PluginContext(arg_parser.parse_args([]), resources, None)
     tp = ToolPlugin()
@@ -73,6 +76,7 @@ def test_tool_plugin_load_mapping_suffixed():
         type=str,
         default="experimental",
     )
+    arg_parser.add_argument("--verbose", dest="verbose")
     resources = Resources([os.path.join(os.path.dirname(__file__), "good_config")])
     plugin_context = PluginContext(arg_parser.parse_args([]), resources, None)
     tp = ToolPlugin()
@@ -91,6 +95,7 @@ def test_tool_plugin_load_mapping_suffixed_fallback():
         type=str,
         default="gibberish",
     )
+    arg_parser.add_argument("--verbose", dest="verbose")
     resources = Resources([os.path.join(os.path.dirname(__file__), "good_config")])
     plugin_context = PluginContext(arg_parser.parse_args([]), resources, None)
     tp = ToolPlugin()

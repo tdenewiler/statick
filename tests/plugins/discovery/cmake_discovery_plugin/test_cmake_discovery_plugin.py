@@ -24,6 +24,7 @@ def setup_cmake_discovery_plugin(add_plugin_context=True, cmake_flags=""):
         action="store_false",
         help="Show tool output",
     )
+    arg_parser.add_argument("--verbose", dest="verbose")
 
     resources = Resources(
         [os.path.join(os.path.dirname(statick_tool.__file__), "plugins")]

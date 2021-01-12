@@ -26,6 +26,7 @@ def setup_shellcheck_tool_plugin(binary=None):
         action="store_false",
         help="Show tool output",
     )
+    arg_parser.add_argument("--verbose", dest="verbose")
     arg_parser.add_argument("--shellcheck-bin", dest="shellcheck_bin")
 
     resources = Resources(

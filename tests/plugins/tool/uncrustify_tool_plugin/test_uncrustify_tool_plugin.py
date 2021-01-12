@@ -33,6 +33,7 @@ def setup_uncrustify_tool_plugin(extra_path=None, use_plugin_context=True, binar
         action="store_false",
         help="Show tool output",
     )
+    arg_parser.add_argument("--verbose", dest="verbose")
 
     paths = []
     if extra_path:

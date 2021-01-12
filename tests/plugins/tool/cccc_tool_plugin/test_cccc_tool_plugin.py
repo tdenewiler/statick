@@ -30,6 +30,7 @@ def setup_cccc_tool_plugin(use_plugin_context=True, binary=None, cccc_config=Non
         action="store_false",
         help="Show tool output",
     )
+    arg_parser.add_argument("--verbose", dest="verbose")
     arg_parser.add_argument("--cccc-bin", dest="cccc_bin")
     arg_parser.add_argument("--cccc-config", dest="cccc_config")
 

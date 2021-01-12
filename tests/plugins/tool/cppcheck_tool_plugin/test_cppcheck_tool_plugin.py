@@ -25,6 +25,7 @@ def setup_cppcheck_tool_plugin(use_plugin_context=True, binary=None):
         action="store_false",
         help="Show tool output",
     )
+    arg_parser.add_argument("--verbose", dest="verbose")
     arg_parser.add_argument("--cppcheck-bin", dest="cppcheck_bin")
     arg_parser.add_argument(
         "--mapping-file-suffix", dest="mapping_file_suffix", type=str

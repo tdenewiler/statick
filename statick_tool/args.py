@@ -27,7 +27,7 @@ class Args:
         self.parser = argparse.ArgumentParser(description=name)
         self.parser.add_argument("--user-paths", **user_path_args)  # type: ignore
 
-    def get_user_paths(self, args: Any = None) -> List[str]:
+    def get_user_paths(self, args: Any = None, verbose: bool = False) -> List[str]:
         """Get a list of user paths containing config or plugins."""
         user_paths = []  # type: List[str]
         args = self.pre_parser.parse_known_args(args)[0]
@@ -37,7 +37,7 @@ class Args:
                 if os.path.exists(path) and os.path.isdir(path):
                     user_paths.append(path)
                 else:
-                    if self.plugin_context and self.plugin_context.args.verbose:
+                    if verbose:
                         print("Could not find user path {}!".format(path))
         return user_paths
 

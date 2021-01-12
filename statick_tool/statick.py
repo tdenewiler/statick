@@ -120,7 +120,7 @@ class Statick:
             "--verbose",
             dest="verbose",
             action="store_true",
-            help="Print Statick status and error messages",
+            help="Print status and error messages",
         )
         args.add_argument(
             "--check",

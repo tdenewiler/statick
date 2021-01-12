@@ -28,6 +28,7 @@ def setup_clang_format_tool_plugin(
         action="store_false",
         help="Show tool output",
     )
+    arg_parser.add_argument("--verbose", dest="verbose")
     arg_parser.add_argument("--clang-format-bin", dest="clang_format_bin")
     if do_raise:
         arg_parser.add_argument(

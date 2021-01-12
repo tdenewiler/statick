@@ -33,7 +33,7 @@ def test_args_user_paths_undefined():
     Expected result: No paths
     """
     args = Args("test")
-    user_paths = args.get_user_paths(["--user-paths", None])
+    user_paths = args.get_user_paths(["--user-paths", None], verbose=True)
     assert user_paths == []
 
 

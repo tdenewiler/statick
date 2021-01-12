@@ -24,6 +24,7 @@ def setup_bandit_tool_plugin(binary=None):
         action="store_false",
         help="Show tool output",
     )
+    arg_parser.add_argument("--verbose", dest="verbose")
     arg_parser.add_argument("--bandit-bin", dest="bandit_bin")
     arg_parser.add_argument(
         "--mapping-file-suffix", dest="mapping_file_suffix", type=str

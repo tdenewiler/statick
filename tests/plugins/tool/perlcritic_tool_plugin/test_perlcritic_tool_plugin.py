@@ -25,6 +25,7 @@ def setup_perlcritic_tool_plugin(binary=None):
         action="store_false",
         help="Show tool output",
     )
+    arg_parser.add_argument("--verbose", dest="verbose")
     arg_parser.add_argument("--perlcritic-bin", dest="perlcritic_bin")
     arg_parser.add_argument(
         "--mapping-file-suffix", dest="mapping_file_suffix", type=str

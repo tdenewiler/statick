@@ -39,6 +39,7 @@ def setup_write_jenkins_warnings_ng_reporting_plugin(
         action="store_false",
         help="Show tool output",
     )
+    arg_parser.add_argument("--verbose", dest="verbose")
 
     resources = Resources(
         [os.path.join(os.path.dirname(statick_tool.__file__), "plugins")]

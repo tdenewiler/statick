@@ -126,9 +126,8 @@ class CMakeDiscoveryPlugin(DiscoveryPlugin):
         if self.plugin_context and self.plugin_context.args.verbose:
             print("  {} make targets found.".format(len(package["make_targets"])))
 
-    @classmethod
     def process_output(  # pylint: disable=too-many-locals
-        cls, output: str, package: Package
+        self, output: str, package: Package
     ) -> None:
         """Parse the tool output."""
         # pylint: disable=anomalous-backslash-in-string

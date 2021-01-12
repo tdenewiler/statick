@@ -161,6 +161,7 @@ def test_filter_issues():
     exceptions = Exceptions(
         os.path.join(os.path.dirname(__file__), "valid_exceptions.yaml")
     )
+    verbose = True
 
     filename = "x.py"
     line_number = "4"
@@ -172,7 +173,7 @@ def test_filter_issues():
     issues = {}
     issues["pylint"] = [tool_issue]
 
-    issues = exceptions.filter_issues(package, issues)
+    issues = exceptions.filter_issues(package, issues, verbose)
     assert not issues["pylint"]
 
 

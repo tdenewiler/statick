@@ -17,7 +17,8 @@ def run(statick: Statick, parsed_args: argparse.Namespace) -> bool:
     if issues is None:
         if parsed_args.verbose:
             print(
-                "Something went wrong, no information about issues. Statick exiting with errors."
+                "Something went wrong, no information about issues."
+                " Statick exiting with errors."
             )
         return False
     for tool in issues:

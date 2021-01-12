@@ -117,12 +117,6 @@ class Statick:
             help="Show tool output",
         )
         args.add_argument(
-            "--verbose",
-            dest="verbose",
-            action="store_true",
-            help="Print status and error messages",
-        )
-        args.add_argument(
             "--check",
             dest="check",
             action="store_true",
@@ -411,7 +405,7 @@ class Statick:
             print("---Tools---")
 
         if self.exceptions is not None:
-            issues = self.exceptions.filter_issues(package, issues)
+            issues = self.exceptions.filter_issues(package, issues, args.verbose)
 
         os.chdir(orig_path)
 

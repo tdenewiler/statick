@@ -23,9 +23,21 @@ class Args:
             "configuration or plugins",
         }
         self.pre_parser.add_argument("--user-paths", **user_path_args)  # type: ignore
+        self.pre_parser.add_argument(
+            "--verbose",
+            dest="verbose",
+            action="store_true",
+            help="Print status and error messages",
+        )
 
         self.parser = argparse.ArgumentParser(description=name)
         self.parser.add_argument("--user-paths", **user_path_args)  # type: ignore
+        self.parser.add_argument(
+            "--verbose",
+            dest="verbose",
+            action="store_true",
+            help="Print status and error messages",
+        )
 
     def get_user_paths(self, args: Any = None, verbose: bool = False) -> List[str]:
         """Get a list of user paths containing config or plugins."""

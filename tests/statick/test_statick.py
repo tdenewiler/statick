@@ -62,7 +62,6 @@ def test_gather_args(init_statick):
     """
     args = Args("Statick tool")
     args.parser.add_argument("--path", help="Path of package to scan")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
 
     statick = Statick(args.get_user_paths())
     statick.gather_args(args.parser)
@@ -86,7 +85,6 @@ def test_get_level(init_statick):
     Expected result: Some level is returned
     """
     args = Args("Statick tool")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
     args.parser.add_argument(
         "--profile", dest="profile", type=str, default="profile-test.yaml"
     )
@@ -101,7 +99,6 @@ def test_get_level_non_default(init_statick):
     Expected result: Some level is returned
     """
     args = Args("Statick tool")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
     args.parser.add_argument(
         "--profile", dest="profile", type=str, default="profile-test.yaml"
     )
@@ -116,7 +113,6 @@ def test_get_level_nonexistent_file(init_statick):
     Expected result: None is returned
     """
     args = Args("Statick tool")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
     args.parser.add_argument(
         "--profile", dest="profile", type=str, default="nonexistent.yaml"
     )
@@ -133,7 +129,6 @@ def test_get_level_ioerror(mocked_profile_constructor, init_statick):
     """
     mocked_profile_constructor.side_effect = OSError("error")
     args = Args("Statick tool")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
     args.parser.add_argument(
         "--profile", dest="profile", type=str, default="profile-test.yaml"
     )
@@ -148,7 +143,6 @@ def test_custom_exceptions_file(init_statick):
     Expected result: Some ignored package is returned
     """
     args = Args("Statick tool")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
     args.parser.add_argument(
         "--exceptions", dest="exceptions", type=str, default="exceptions-test.yaml"
     )
@@ -174,7 +168,6 @@ def test_custom_config_file(init_statick):
     Expected result: Some ignored package is returned
     """
     args = Args("Statick tool")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
     args.parser.add_argument(
         "--config", dest="config", type=str, default="config-test.yaml"
     )
@@ -188,7 +181,6 @@ def test_get_level_valueerror(mocked_profile_constructor, init_statick):
     """Test the behavior when Profile throws a ValueError."""
     mocked_profile_constructor.side_effect = ValueError("error")
     args = Args("Statick tool")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
     args.parser.add_argument(
         "--profile", dest="profile", type=str, default="profile-test.yaml"
     )
@@ -201,7 +193,6 @@ def test_get_config_valueerror(mocked_config_constructor, init_statick):
     """Test the behavior when Config throws a ValueError."""
     mocked_config_constructor.side_effect = ValueError("error")
     args = Args("Statick tool")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
     args.parser.add_argument(
         "--config", dest="config", type=str, default="config-test.yaml"
     )
@@ -214,7 +205,6 @@ def test_get_config_oserror(mocked_config_constructor, init_statick):
     """Test the behavior when Config throws a OSError."""
     mocked_config_constructor.side_effect = OSError("error")
     args = Args("Statick tool")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
     args.parser.add_argument(
         "--config", dest="config", type=str, default="config-test.yaml"
     )
@@ -227,7 +217,6 @@ def test_get_exceptions_valueerror(mocked_exceptions_constructor, init_statick):
     """Test the behavior when Exceptions throws a ValueError."""
     mocked_exceptions_constructor.side_effect = ValueError("error")
     args = Args("Statick tool")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
     args.parser.add_argument(
         "--exceptions", dest="exceptions", type=str, default="exceptions-test.yaml"
     )
@@ -240,7 +229,6 @@ def test_get_exceptions_oserror(mocked_exceptions_constructor, init_statick):
     """Test the behavior when Exceptions throws a OSError."""
     mocked_exceptions_constructor.side_effect = OSError("error")
     args = Args("Statick tool")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
     args.parser.add_argument(
         "--exceptions", dest="exceptions", type=str, default="exceptions-test.yaml"
     )
@@ -320,7 +308,6 @@ def test_run_missing_config(init_statick):
 def test_run_output_is_not_directory(init_statick):
     """Test running Statick against a missing directory."""
     args = Args("Statick tool")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
     args.parser.add_argument("--path", help="Path of package to scan")
 
     statick = Statick(args.get_user_paths())
@@ -374,7 +361,6 @@ def test_run_package_is_ignored(init_statick):
     Expected results: issues is empty and success is True
     """
     args = Args("Statick tool")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
     args.parser.add_argument("--path", help="Path of package to scan")
 
     statick = Statick(args.get_user_paths())
@@ -612,7 +598,6 @@ def test_run_invalid_reporting_plugins(init_statick):
     Expected results: issues is None and success is False
     """
     args = Args("Statick tool")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
     args.parser.add_argument("--path", help="Path of package to scan")
 
     statick = Statick(args.get_user_paths())
@@ -646,7 +631,6 @@ def test_run_invalid_level(init_statick):
     Expected results: issues is None and success is False
     """
     args = Args("Statick tool")
-    args.parser.add_argument("--verbose", help="Print status and error messages")
     args.parser.add_argument("--path", help="Path of package to scan")
 
     statick = Statick(args.get_user_paths())

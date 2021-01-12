@@ -109,7 +109,7 @@ class Exceptions:
         return file_list
 
     def filter_file_exceptions(
-        self, package: Package, exceptions: List[Any], issues: Dict[str, List[Issue]]
+        self, package: Package, exceptions: List[Any], issues: Dict[str, List[Issue]], verbose: bool = False
     ) -> Dict[str, List[Issue]]:
         """Filter issues based on file pattern exceptions list."""
         for tool, tool_issues in list(  # pylint: disable=too-many-nested-blocks
@@ -141,7 +141,7 @@ class Exceptions:
         return issues
 
     def filter_regex_exceptions(
-        self, exceptions: List[Any], issues: Dict[str, List[Issue]]
+        self, exceptions: List[Any], issues: Dict[str, List[Issue]], verbose: bool = False
     ) -> Dict[str, List[Issue]]:
         """Filter issues based on message regex exceptions list."""
         for exception in exceptions:  # pylint: disable=too-many-nested-blocks
@@ -153,7 +153,7 @@ class Exceptions:
             try:
                 compiled_re = re.compile(exception_re)  # type: Pattern[str]
             except re.error:
-                if self.plugin_context and self.plugin_context.args.verbose:
+                if verbose:
                     print(
                         "Invalid regular expression in exception: {}".format(exception_re)
                     )
@@ -204,27 +204,27 @@ class Exceptions:
         return issues
 
     def filter_issues(
-        self, package: Package, issues: Dict[str, List[Issue]]
+        self, package: Package, issues: Dict[str, List[Issue]], verbose: bool = False
     ) -> Dict[str, List[Issue]]:
         """Filter issues based on exceptions list."""
         exceptions = self.get_exceptions(package)
 
         if exceptions["file"]:
-            issues = self.filter_file_exceptions(package, exceptions["file"], issues)
+            issues = self.filter_file_exceptions(package, exceptions["file"], issues, verbose)
 
         if exceptions["message_regex"]:
-            issues = self.filter_regex_exceptions(exceptions["message_regex"], issues)
+            issues = self.filter_regex_exceptions(exceptions["message_regex"], issues, verbose)
 
         issues = self.filter_nolint(issues)
 
         return issues
 
-    def print_exception_warning(self, tool: str) -> None:
+    def print_exception_warning(self, tool: str, verbose: bool = False) -> None:
         """Print warning about exception not being applied for an issue.
 
         Warning will only be printed once per tool.
         """
-        if self.plugin_context and self.plugin_context.args.verbose:
+        if verbose:
             print(
                 "[WARNING] File exceptions not available for {} tool "
                 "plugin due to lack of absolute paths for issues.".format(tool)

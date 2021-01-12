@@ -32,31 +32,35 @@ class JavaDiscoveryPlugin(DiscoveryPlugin):
         java_src_files = list(OrderedDict.fromkeys(java_src_files))
         java_class_files = list(OrderedDict.fromkeys(java_class_files))
 
-        print("  {} java source files found.".format(len(java_src_files)))
+        if self.plugin_context and self.plugin_context.args.verbose:
+            print("  {} java source files found.".format(len(java_src_files)))
         if exceptions:
             original_src_file_count = len(java_src_files)
             java_src_files = exceptions.filter_file_exceptions_early(
                 package, java_src_files
             )
             if original_src_file_count > len(java_src_files):
-                print(
-                    "  After filtering, {} java source files will be scanned.".format(
-                        len(java_src_files)
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print(
+                        "  After filtering, {} java source files will be scanned.".format(
+                            len(java_src_files)
+                        )
                     )
-                )
 
-        print("  {} java class files found.".format(len(java_class_files)))
+        if self.plugin_context and self.plugin_context.args.verbose:
+            print("  {} java class files found.".format(len(java_class_files)))
         if exceptions:
             original_class_file_count = len(java_class_files)
             java_class_files = exceptions.filter_file_exceptions_early(
                 package, java_class_files
             )
             if original_class_file_count > len(java_class_files):
-                print(
-                    "  After filtering, {} java class files will be scanned.".format(
-                        len(java_class_files)
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print(
+                        "  After filtering, {} java class files will be scanned.".format(
+                            len(java_class_files)
+                        )
                     )
-                )
 
         package["java_src"] = java_src_files
         package["java_bin"] = java_class_files

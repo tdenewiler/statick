@@ -42,13 +42,15 @@ class WriteJenkinsWarningsNGReportingPlugin(ReportingPlugin):
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
         if not os.path.isdir(output_dir):
-            print("Unable to create output directory at {}!".format(output_dir))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("Unable to create output directory at {}!".format(output_dir))
             return None, False
 
         output_file = os.path.join(
             output_dir, package.name + "-" + level + ".json.statick"
         )
-        print("Writing output to {}".format(output_file))
+        if self.plugin_context and self.plugin_context.args.verbose:
+            print("Writing output to {}".format(output_file))
         with open(output_file, "w") as out:
             for _, value in issues.items():
                 for issue in value:
@@ -61,10 +63,11 @@ class WriteJenkinsWarningsNGReportingPlugin(ReportingPlugin):
                         if int(issue.severity) > 4:
                             severity = "ERROR"
                     except ValueError as ex:
-                        print(
-                            "Invalid severity integer ({}), using default 'LOW' severity. "
-                            "Error = {}".format(issue.severity, ex)
-                        )
+                        if self.plugin_context and self.plugin_context.args.verbose:
+                            print(
+                                "Invalid severity integer ({}), using default 'LOW' severity. "
+                                "Error = {}".format(issue.severity, ex)
+                            )
                     issue_dict = {
                         "fileName": issue.filename,
                         "severity": severity,

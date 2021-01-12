@@ -18,7 +18,8 @@ class MakeToolPlugin(ToolPlugin):
     def scan(self, package: Package, level: str) -> Optional[List[Issue]]:
         """Run tool and gather output."""
         if "make_targets" not in package or not package["make_targets"]:
-            print("  Skipping make. No targets.")
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("  Skipping make. No targets.")
             return []
 
         output = None
@@ -34,12 +35,14 @@ class MakeToolPlugin(ToolPlugin):
 
         except subprocess.CalledProcessError as ex:
             output = ex.output
-            print("Make failed! Returncode = {}".format(ex.returncode))
-            print("Exception output: {}".format(ex.output))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("Make failed! Returncode = {}".format(ex.returncode))
+                print("Exception output: {}".format(ex.output))
             return None
 
         except OSError as ex:
-            print("Couldn't find make executable! ({})".format(ex))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("Couldn't find make executable! ({})".format(ex))
             return None
 
         if self.plugin_context and self.plugin_context.args.output_directory:

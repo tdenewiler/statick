@@ -96,8 +96,9 @@ class ClangFormatToolPlugin(ToolPlugin):
                     total_output.append(output)
 
         except (IOError, OSError) as ex:
-            print("clang-format binary failed: {}".format(clang_format_bin))
-            print("Error = {}".format(str(ex.strerror)))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("clang-format binary failed: {}".format(clang_format_bin))
+                print("Error = {}".format(str(ex.strerror)))
             if (
                 self.plugin_context
                 and self.plugin_context.args.clang_format_raise_exception
@@ -106,9 +107,10 @@ class ClangFormatToolPlugin(ToolPlugin):
             return []
 
         except subprocess.CalledProcessError as ex:
-            print("clang-format binary failed: {}.".format(clang_format_bin))
-            print("Returncode: {}".format(str(ex.returncode)))
-            print("Error: {}".format(ex.output))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("clang-format binary failed: {}.".format(clang_format_bin))
+                print("Returncode: {}".format(str(ex.returncode)))
+                print("Error: {}".format(ex.output))
             if (
                 self.plugin_context
                 and self.plugin_context.args.clang_format_raise_exception
@@ -170,14 +172,16 @@ class ClangFormatToolPlugin(ToolPlugin):
                             raise exc
 
         except (IOError, OSError) as ex:
-            print("{}".format(exc_msg))
-            print("Error: {}".format(str(ex.strerror)))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("{}".format(exc_msg))
+                print("Error: {}".format(str(ex.strerror)))
             if self.plugin_context.args.clang_format_raise_exception:
                 return None
             return False
 
         except subprocess.CalledProcessError as ex:
-            print("{} Returncode = {}".format(exc_msg, str(ex.returncode)))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("{} Returncode = {}".format(exc_msg, str(ex.returncode)))
             if self.plugin_context.args.clang_format_raise_exception:
                 return None
 

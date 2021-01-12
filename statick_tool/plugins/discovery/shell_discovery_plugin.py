@@ -33,15 +33,17 @@ class ShellDiscoveryPlugin(DiscoveryPlugin):
 
         shell_files = list(OrderedDict.fromkeys(shell_files))
 
-        print("  {} shell files found.".format(len(shell_files)))
+        if self.plugin_context and self.plugin_context.args.verbose:
+            print("  {} shell files found.".format(len(shell_files)))
         if exceptions:
             original_file_count = len(shell_files)
             shell_files = exceptions.filter_file_exceptions_early(package, shell_files)
             if original_file_count > len(shell_files):
-                print(
-                    "  After filtering, {} shell files will be scanned.".format(
-                        len(shell_files)
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print(
+                        "  After filtering, {} shell files will be scanned.".format(
+                            len(shell_files)
+                        )
                     )
-                )
 
         package["shell_src"] = shell_files

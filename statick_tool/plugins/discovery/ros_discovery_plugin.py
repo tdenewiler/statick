@@ -48,7 +48,8 @@ class RosDiscoveryPlugin(DiscoveryPlugin):
             and os.path.isfile(package_file)
             and ros_version is not None
         ):
-            print("  Package is ROS{}.".format(ros_version))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("  Package is ROS{}.".format(ros_version))
             package["ros"] = True
             if ros_version == "1":
                 package["catkin"] = True
@@ -71,10 +72,12 @@ class RosDiscoveryPlugin(DiscoveryPlugin):
                 ) as exc:
                     # No valid XML found, so we are not going to find the build type.
                     package["ros"] = False
-                    print("  Invalid XML in {}: {}".format(package_file, exc))
+                    if self.plugin_context and self.plugin_context.args.verbose:
+                        print("  Invalid XML in {}: {}".format(package_file, exc))
                     return
                 if self.deep_get(output, "package.export.build_type") == "ament_python":
-                    print("  Package is ROS{}.".format(ros_version))
+                    if self.plugin_context and self.plugin_context.args.verbose:
+                        print("  Package is ROS{}.".format(ros_version))
                     package["ros"] = True
         else:
             package["ros"] = False

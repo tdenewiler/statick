@@ -31,12 +31,14 @@ class FlawfinderToolPlugin(ToolPlugin):
                     subproc_args, stderr=subprocess.STDOUT, universal_newlines=True
                 )
             except subprocess.CalledProcessError as ex:
-                print("Problem {}".format(ex.returncode))
-                print("{}".format(ex.output))
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print("Problem {}".format(ex.returncode))
+                    print("{}".format(ex.output))
                 return None
 
             except OSError as ex:
-                print("Couldn't find flawfinder executable! ({})".format(ex))
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print("Couldn't find flawfinder executable! ({})".format(ex))
                 return None
 
             if self.plugin_context and self.plugin_context.args.show_tool_output:

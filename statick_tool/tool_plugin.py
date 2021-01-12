@@ -63,7 +63,8 @@ class ToolPlugin(IPlugin):  # type: ignore
             for line in mapping_file.readlines():
                 split_line = line.strip().split(":")
                 if len(split_line) != 2:
-                    print("Warning: invalid line {} in file {}".format(line, file_name))
+                    if self.plugin_context and self.plugin_context.args.verbose:
+                        print("Warning: invalid line {} in file {}".format(line, file_name))
                     continue
                 warning_mapping[split_line[0]] = split_line[1]
         return warning_mapping

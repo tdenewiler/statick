@@ -25,7 +25,8 @@ class SpotbugsToolPlugin(ToolPlugin):
         """Run tool and gather output."""
         # Sanity check - make sure mvn exists
         if not self.command_exists("mvn"):
-            print("Couldn't find 'mvn' command, can't run Spotbugs Maven integration")
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("Couldn't find 'mvn' command, can't run Spotbugs Maven integration")
             return None
 
         if self.plugin_context is None:
@@ -72,12 +73,14 @@ class SpotbugsToolPlugin(ToolPlugin):
                 )
             except subprocess.CalledProcessError as ex:
                 output = ex.output
-                print("spotbugs failed! Returncode = {}".format(str(ex.returncode)))
-                print("{}".format(ex.output))
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print("spotbugs failed! Returncode = {}".format(str(ex.returncode)))
+                    print("{}".format(ex.output))
                 return None
 
             except OSError as ex:
-                print("Couldn't find maven! ({})".format(ex))
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print("Couldn't find maven! ({})".format(ex))
                 return None
 
             if self.plugin_context.args.show_tool_output:
@@ -108,11 +111,12 @@ class SpotbugsToolPlugin(ToolPlugin):
         try:
             output_xml = etree.fromstring(output)
         except etree.ParseError as ex:
-            print(
-                "Couldn't parse Spotbugs output ({})! Provided output was:\n{}".format(
-                    ex, output
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print(
+                    "Couldn't parse Spotbugs output ({})! Provided output was:\n{}".format(
+                        ex, output
+                    )
                 )
-            )
             return None
         for file_entry in output_xml.findall("file"):
             # Generate the filename
@@ -128,11 +132,12 @@ class SpotbugsToolPlugin(ToolPlugin):
                         file_path = joined_path
                         break
             if not file_path:
-                print(
-                    "Couldn't find file for class {}".format(
-                        file_entry.attrib["classname"]
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print(
+                        "Couldn't find file for class {}".format(
+                            file_entry.attrib["classname"]
+                        )
                     )
-                )
                 file_path = java_path_string
             for issue in file_entry.findall("BugInstance"):
                 severity = "1"

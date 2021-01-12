@@ -140,9 +140,8 @@ class Exceptions:
 
         return issues
 
-    @classmethod
     def filter_regex_exceptions(
-        cls, exceptions: List[Any], issues: Dict[str, List[Issue]]
+        self, exceptions: List[Any], issues: Dict[str, List[Issue]]
     ) -> Dict[str, List[Issue]]:
         """Filter issues based on message regex exceptions list."""
         for exception in exceptions:  # pylint: disable=too-many-nested-blocks
@@ -154,9 +153,10 @@ class Exceptions:
             try:
                 compiled_re = re.compile(exception_re)  # type: Pattern[str]
             except re.error:
-                print(
-                    "Invalid regular expression in exception: {}".format(exception_re)
-                )
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print(
+                        "Invalid regular expression in exception: {}".format(exception_re)
+                    )
                 continue
             for tool, tool_issues in list(issues.items()):
                 to_remove = []
@@ -219,13 +219,13 @@ class Exceptions:
 
         return issues
 
-    @classmethod
-    def print_exception_warning(cls, tool: str) -> None:
+    def print_exception_warning(self, tool: str) -> None:
         """Print warning about exception not being applied for an issue.
 
         Warning will only be printed once per tool.
         """
-        print(
-            "[WARNING] File exceptions not available for {} tool "
-            "plugin due to lack of absolute paths for issues.".format(tool)
-        )
+        if self.plugin_context and self.plugin_context.args.verbose:
+            print(
+                "[WARNING] File exceptions not available for {} tool "
+                "plugin due to lack of absolute paths for issues.".format(tool)
+            )

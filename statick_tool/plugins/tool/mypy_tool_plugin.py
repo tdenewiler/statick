@@ -41,14 +41,16 @@ class MypyToolPlugin(ToolPlugin):
                 )
 
             except (IOError, OSError) as ex:
-                print("mypy binary failed: {}".format(tool_bin))
-                print("Error = {}".format(str(ex.strerror)))
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print("mypy binary failed: {}".format(tool_bin))
+                    print("Error = {}".format(str(ex.strerror)))
                 return []
 
             except subprocess.CalledProcessError as ex:
-                print("mypy binary failed: {}.".format(tool_bin))
-                print("Returncode: {}".format(str(ex.returncode)))
-                print("Error: {}".format(ex.output))
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print("mypy binary failed: {}.".format(tool_bin))
+                    print("Returncode: {}".format(str(ex.returncode)))
+                    print("Error: {}".format(ex.output))
                 total_output.append(ex.output)
                 continue
 

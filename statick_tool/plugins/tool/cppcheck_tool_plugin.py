@@ -67,21 +67,24 @@ class CppcheckToolPlugin(ToolPlugin):
                 ver = float(match.group(2))
                 # If specific version is not specified just use the installed version.
                 if user_version is not None and ver != float(user_version):
-                    print(
-                        "You need version {} of cppcheck, but you have {}. "
-                        "See README.md for instuctions on how to install the "
-                        "proper version".format(user_version, match.group(2))
-                    )
+                    if self.plugin_context and self.plugin_context.args.verbose:
+                        print(
+                            "You need version {} of cppcheck, but you have {}. "
+                            "See README.md for instuctions on how to install the "
+                            "proper version".format(user_version, match.group(2))
+                        )
                     return None
 
         except OSError as ex:
-            print("Cppcheck not found! ({})".format(ex))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("Cppcheck not found! ({})".format(ex))
             return None
 
         except subprocess.CalledProcessError as ex:
             output = ex.output
-            print("Cppcheck failed! Returncode = {}".format(ex.returncode))
-            print("Exception output: {}".format(ex.output))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("Cppcheck failed! Returncode = {}".format(ex.returncode))
+                print("Exception output: {}".format(ex.output))
             return None
 
         files = []  # type: List[str]
@@ -113,8 +116,9 @@ class CppcheckToolPlugin(ToolPlugin):
             )
         except subprocess.CalledProcessError as ex:
             output = ex.output
-            print("cppcheck failed! Returncode = {}".format(ex.returncode))
-            print("{}".format(ex.output))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("cppcheck failed! Returncode = {}".format(ex.returncode))
+                print("{}".format(ex.output))
             return None
 
         if self.plugin_context.args.show_tool_output:

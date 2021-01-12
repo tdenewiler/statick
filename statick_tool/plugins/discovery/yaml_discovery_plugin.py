@@ -29,15 +29,17 @@ class YAMLDiscoveryPlugin(DiscoveryPlugin):
 
         yaml_files = list(OrderedDict.fromkeys(yaml_files))
 
-        print("  {} YAML files found.".format(len(yaml_files)))
+        if self.plugin_context and self.plugin_context.args.verbose:
+            print("  {} YAML files found.".format(len(yaml_files)))
         if exceptions:
             original_file_count = len(yaml_files)
             yaml_files = exceptions.filter_file_exceptions_early(package, yaml_files)
             if original_file_count > len(yaml_files):
-                print(
-                    "  After filtering, {} YAML files will be scanned.".format(
-                        len(yaml_files)
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print(
+                        "  After filtering, {} YAML files will be scanned.".format(
+                            len(yaml_files)
+                        )
                     )
-                )
 
         package["yaml"] = yaml_files

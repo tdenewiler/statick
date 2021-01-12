@@ -44,8 +44,9 @@ class MavenDiscoveryPlugin(DiscoveryPlugin):
         top_poms = list(OrderedDict.fromkeys(top_poms))
         all_poms = list(OrderedDict.fromkeys(all_poms))
 
-        print("  {} Maven POM files found.".format(len(all_poms)))
-        print("  {} top-level Maven POM files found.".format(len(top_poms)))
+        if self.plugin_context and self.plugin_context.args.verbose:
+            print("  {} Maven POM files found.".format(len(all_poms)))
+            print("  {} top-level Maven POM files found.".format(len(top_poms)))
 
         package["all_poms"] = all_poms
         package["top_poms"] = top_poms

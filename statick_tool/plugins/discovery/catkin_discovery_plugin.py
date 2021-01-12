@@ -27,8 +27,10 @@ class CatkinDiscoveryPlugin(DiscoveryPlugin):
         package_file = os.path.join(package.path, "package.xml")
 
         if os.path.isfile(cmake_file) and os.path.isfile(package_file):
-            print("  Package is catkin.")
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("  Package is catkin.")
             package["catkin"] = True
         else:
-            print("  Package is not catkin.")
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("  Package is not catkin.")
             package["catkin"] = False

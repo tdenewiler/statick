@@ -52,12 +52,14 @@ class PerlCriticToolPlugin(ToolPlugin):
         except subprocess.CalledProcessError as ex:
             output = ex.output
             if ex.returncode != 2:
-                print("perlcritic failed! Returncode = {}".format(str(ex.returncode)))
-                print("{}".format(ex.output))
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print("perlcritic failed! Returncode = {}".format(str(ex.returncode)))
+                    print("{}".format(ex.output))
                 return []
 
         except OSError as ex:
-            print("Couldn't find {}! ({})".format(perlcritic_bin, ex))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("Couldn't find {}! ({})".format(perlcritic_bin, ex))
             return []
 
         if self.plugin_context and self.plugin_context.args.show_tool_output:

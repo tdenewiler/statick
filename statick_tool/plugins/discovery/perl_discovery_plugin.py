@@ -31,15 +31,17 @@ class PerlDiscoveryPlugin(DiscoveryPlugin):
 
         perl_files = list(OrderedDict.fromkeys(perl_files))
 
-        print("  {} Perl files found.".format(len(perl_files)))
+        if self.plugin_context and self.plugin_context.args.verbose:
+            print("  {} Perl files found.".format(len(perl_files)))
         if exceptions:
             original_file_count = len(perl_files)
             perl_files = exceptions.filter_file_exceptions_early(package, perl_files)
             if original_file_count > len(perl_files):
-                print(
-                    "  After filtering, {} perl files will be scanned.".format(
-                        len(perl_files)
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print(
+                        "  After filtering, {} perl files will be scanned.".format(
+                            len(perl_files)
+                        )
                     )
-                )
 
         package["perl_src"] = perl_files

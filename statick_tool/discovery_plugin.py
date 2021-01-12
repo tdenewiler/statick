@@ -78,8 +78,9 @@ class DiscoveryPlugin(IPlugin):  # type: ignore
             )  # type: str
             return output.lower()
         except subprocess.CalledProcessError as ex:
-            print("Failed to run 'file' command. Returncode = {}".format(ex.returncode))
-            print("Exception output: {}".format(ex.output))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("Failed to run 'file' command. Returncode = {}".format(ex.returncode))
+                print("Exception output: {}".format(ex.output))
             return ""
 
     def set_plugin_context(self, plugin_context: Union[None, PluginContext]) -> None:

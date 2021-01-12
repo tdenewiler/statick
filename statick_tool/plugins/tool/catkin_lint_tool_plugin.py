@@ -32,16 +32,19 @@ class CatkinLintToolPlugin(ToolPlugin):
         except subprocess.CalledProcessError as ex:
             output = ex.output
             if ex.returncode != 1:
-                print("catkin_lint failed! Returncode = {}".format(ex.returncode))
-                print("{}".format(ex.output))
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print("catkin_lint failed! Returncode = {}".format(ex.returncode))
+                    print("{}".format(ex.output))
                 return None
 
         except OSError as ex:
-            print("Couldn't find catkin_lint executable! ({})".format(ex))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("Couldn't find catkin_lint executable! ({})".format(ex))
             return None
 
         if self.plugin_context and self.plugin_context.args.show_tool_output:
-            print("{}".format(output))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("{}".format(output))
 
         if self.plugin_context and self.plugin_context.args.output_directory:
             with open(self.get_name() + ".log", "w") as fname:

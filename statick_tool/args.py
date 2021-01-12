@@ -37,7 +37,8 @@ class Args:
                 if os.path.exists(path) and os.path.isdir(path):
                     user_paths.append(path)
                 else:
-                    print("Could not find user path {}!".format(path))
+                    if self.plugin_context and self.plugin_context.args.verbose:
+                        print("Could not find user path {}!".format(path))
         return user_paths
 
     def get_args(self, args: Optional[List[str]] = None) -> argparse.Namespace:

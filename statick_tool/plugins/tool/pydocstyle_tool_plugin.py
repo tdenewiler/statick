@@ -33,14 +33,16 @@ class PydocstyleToolPlugin(ToolPlugin):
             except subprocess.CalledProcessError as ex:
                 # Return code 1 just means "found problems"
                 if ex.returncode != 1:
-                    print("Problem {}".format(ex.returncode))
-                    print("{}".format(ex.output))
+                    if self.plugin_context and self.plugin_context.args.verbose:
+                        print("Problem {}".format(ex.returncode))
+                        print("{}".format(ex.output))
                     return None
 
                 output = ex.output
 
             except OSError as ex:
-                print("Couldn't find {}! ({})".format(tool_bin, ex))
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print("Couldn't find {}! ({})".format(tool_bin, ex))
                 return None
 
             if self.plugin_context and self.plugin_context.args.show_tool_output:

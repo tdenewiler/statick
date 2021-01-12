@@ -81,12 +81,14 @@ class ClangTidyToolPlugin(ToolPlugin):
         except subprocess.CalledProcessError as ex:
             output = ex.output
             if ex.returncode != 1:
-                print("clang-tidy failed! Returncode = {}".format(str(ex.returncode)))
-                print("{}".format(ex.output))
+                if self.plugin_context and self.plugin_context.args.verbose:
+                    print("clang-tidy failed! Returncode = {}".format(str(ex.returncode)))
+                    print("{}".format(ex.output))
                 return None
 
         except OSError as ex:
-            print("Couldn't find {}! ({})".format(clang_tidy_bin, ex))
+            if self.plugin_context and self.plugin_context.args.verbose:
+                print("Couldn't find {}! ({})".format(clang_tidy_bin, ex))
             return None
 
         if self.plugin_context.args.show_tool_output:

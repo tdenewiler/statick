@@ -10,7 +10,7 @@ with open("README.md", encoding="utf8") as f:
 
 TEST_DEPS = [
     "backports.tempfile",
-    "pylint-django",
+    "pylint-django<2.0",
     "pytest",
     "mock",
     "tox",
@@ -40,7 +40,11 @@ setup(
     scripts=["statick"],
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
+    # Need to duplicate tests_require here due to a bug in pip-compile.
+    # https://web.git.mil/mm/ci/-/jobs/199059
     install_requires=[
+        "PyYAML",
+        "backports.tempfile",
         "bandit",
         "black",
         "cmakelint",
@@ -50,14 +54,17 @@ setup(
         "flawfinder",
         "isort",
         "lizard",
+        "mock",
         "mypy",
         "pycodestyle",
         "pydocstyle",
         "pyflakes",
         "pylint",
-        "PyYAML",
+        "pylint-django<2.0",
+        "pytest",
         "ruff",
         "tabulate",
+        "tox",
         "xmltodict",
         "yamllint",
         "yapsy",

@@ -51,6 +51,9 @@ setup(
         "cpplint",
         "deprecated",
         "docformatter",
+        # Pin due to formatting conflict with black.
+        # https://github.com/PyCQA/docformatter/issues/94
+        "docformatter==1.5.1",
         "flawfinder",
         "isort",
         "lizard",

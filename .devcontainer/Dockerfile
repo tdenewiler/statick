@@ -10,11 +10,12 @@ USER root
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Developer Packages
+# Developer packages.
 RUN apt-get update && apt-get install --no-install-recommends -y \
     bash-completion \
     ca-certificates \
     gitk \
+    gnupg2 \
     less \
     vim && \
     rm -rf /var/lib/apt/lists/* && \
@@ -96,6 +97,7 @@ COPY .devcontainer/config/.bash_prompt ${HOME}/.bash_prompt
 COPY .devcontainer/config/.git-completion.bash ${HOME}/.git-completion.bash
 RUN echo ". ~/.git-prompt.sh" >> ${HOME}/.bashrc && \
     echo ". ~/.bash_prompt" >> ${HOME}/.bashrc && \
+    echo "export GPG_TTY=$(tty)" >> ${HOME}/.bashrc && \
     echo " \n\
     if [ -f ~/.git-completion.bash ]; then \n\
       . ~/.git-completion.bash \n\
